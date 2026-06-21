@@ -71,7 +71,7 @@ class EhraQuestionsSampahData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak', 'risk' => true],
                 ],
-                'skip' => [['if_question_code' => 'C.6', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'C.8']],
+                'skip' => ['2' => 'C.8'],
             ],
             [
                 'code' => 'C.7', 'text' => 'Jika mendaur ulang, apa saja jenis sampah yang dipilah/dipisahkan sebelum dibuang?',
@@ -114,7 +114,7 @@ class EhraQuestionsSampahData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak'],
                 ],
-                'skip' => [['if_question_code' => 'C.10', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'C.13']],
+                'skip' => ['2' => 'C.13'],
             ],
             [
                 'code' => 'C.11', 'text' => 'Kepada siapa membayarnya?',
@@ -134,7 +134,7 @@ class EhraQuestionsSampahData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak'],
                 ],
-                'skip' => [['if_question_code' => 'C.13', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'C.16']],
+                'skip' => ['2' => 'C.16'],
             ],
             [
                 'code' => 'C.14', 'text' => 'Amati: Apakah ada kompos yang sudah bisa dipakai?',
@@ -203,7 +203,7 @@ class EhraQuestionsSampahData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak'],
                 ],
-                'skip' => [['if_question_code' => 'C.20', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'D.1']],
+                'skip' => ['2' => 'D.1'],
             ],
             [
                 'code' => 'C.21', 'text' => 'Bagaimana ibu/responden mengelola sampah anggota keluarga yang sedang melakukan perawatan/sakit di rumah (masker, sarung tangan, dll)?',

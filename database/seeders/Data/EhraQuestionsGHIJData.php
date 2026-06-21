@@ -23,7 +23,7 @@ class EhraQuestionsGHIJData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak', 'risk' => true],
                 ],
-                'skip' => [['if_question_code' => 'G.1', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'H.1']],
+                'skip' => ['2' => 'H.1'],
             ],
             [
                 'code' => 'G.2', 'text' => 'Di mana saja anggota keluarga biasanya mencuci tangan?',
@@ -101,7 +101,7 @@ class EhraQuestionsGHIJData
                     ['value' => '5', 'label' => 'Lebih dari 3 bulan lalu'],
                     ['value' => '6', 'label' => 'Tidak pernah'],
                 ],
-                'skip' => [['if_question_code' => 'H.1', 'operator' => 'equals', 'value' => '6', 'action' => 'jump', 'target_code' => 'I.1']],
+                'skip' => ['6' => 'I.1'],
             ],
             [
                 'code' => 'H.2', 'text' => 'Siapa anggota keluarga terakhir yang terkena diare?',
@@ -135,7 +135,7 @@ class EhraQuestionsGHIJData
                 'skip' => null,
             ],
             [
-                'code' => 'I.2', 'text' => 'Amati: Tidak ada tikus, kecoa dan binatang pengganggu vektor lainnya',
+                'code' => 'I.2', 'text' => 'Amati: Tidak ada tikus, kecoa dan binatang pengganggu vektor lainnya (jejak binatang pengganggu/vektor tidak ada)',
                 'type' => 'single_choice', 'obs' => true, 'required' => true, 'sort' => 2,
                 'options' => [
                     ['value' => '1', 'label' => 'Ya'],
@@ -144,7 +144,7 @@ class EhraQuestionsGHIJData
                 'skip' => null,
             ],
             [
-                'code' => 'I.3', 'text' => 'Amati: Pencahayaan alam dan/atau buatan yang dapat menerangi seluruh ruangan?',
+                'code' => 'I.3', 'text' => 'Amati: Pencahayaan alam dan/atau buatan yang langsung ataupun tidak langsung dapat menerangi seluruh ruangan?',
                 'type' => 'single_choice', 'obs' => true, 'required' => true, 'sort' => 3,
                 'options' => [
                     ['value' => '1', 'label' => 'Ya'],

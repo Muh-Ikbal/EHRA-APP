@@ -19,7 +19,7 @@ class EhraQuestionsTinjaData
                     ['value' => '3', 'label' => 'MCK/WC Umum'],
                     ['value' => '4', 'label' => 'Ke empang/kolam/sungai/pantai/kebun/selokan/got/saluran irigasi/drainase', 'risk' => true],
                 ],
-                'skip' => [['if_question_code' => 'D.1', 'operator' => 'equals', 'value' => '4', 'action' => 'jump', 'target_code' => 'D.2']],
+                'skip' => ['4' => 'D.2'],
             ],
             [
                 'code' => 'D.2', 'text' => 'Apakah masih ada orang lain/tetangga di lingkungan ibu yang buang air besar sembarangan di tempat terbuka?',
@@ -49,9 +49,10 @@ class EhraQuestionsTinjaData
                     ['value' => '7', 'label' => 'Kloset/plengsengan/cemplung ke empang/sungai/drainase', 'risk' => true],
                 ],
                 'skip' => [
-                    ['if_question_code' => 'D.3', 'operator' => 'equals', 'value' => '1', 'action' => 'jump', 'target_code' => 'D.12'],
-                    ['if_question_code' => 'D.3', 'operator' => 'in', 'value' => '2,3', 'action' => 'jump', 'target_code' => 'D.8'],
-                    ['if_question_code' => 'D.3', 'operator' => 'equals', 'value' => '7', 'action' => 'jump', 'target_code' => 'D.16'],
+                    '1' => 'D.12',
+                    '2' => 'D.8',
+                    '3' => 'D.8',
+                    '7' => 'D.16',
                 ],
             ],
             [
@@ -140,7 +141,7 @@ class EhraQuestionsTinjaData
                     ['value' => '4', 'label' => 'Lebih dari 10 tahun yang lalu', 'risk' => true],
                     ['value' => '5', 'label' => 'Tidak pernah', 'risk' => true],
                 ],
-                'skip' => [['if_question_code' => 'D.12', 'operator' => 'equals', 'value' => '5', 'action' => 'jump', 'target_code' => 'D.16']],
+                'skip' => ['5' => 'D.16'],
             ],
             [
                 'code' => 'D.13', 'text' => 'Siapa yang mengosongkan tangki septik Ibu?',
@@ -181,7 +182,7 @@ class EhraQuestionsTinjaData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak'],
                 ],
-                'skip' => [['if_question_code' => 'D.16', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'D.19']],
+                'skip' => ['2' => 'D.19'],
             ],
             [
                 'code' => 'D.17', 'text' => 'Bagaimana cara penanganan tinja bayi dan balita yang menggunakan popok sekali pakai/pampers?',
@@ -212,7 +213,7 @@ class EhraQuestionsTinjaData
                     ['value' => '1', 'label' => 'Mau berlangganan dengan membayar'],
                     ['value' => '2', 'label' => 'Tidak mau berlangganan'],
                 ],
-                'skip' => [['if_question_code' => 'D.19', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'D.21']],
+                'skip' => ['2' => 'D.21'],
             ],
             [
                 'code' => 'D.20', 'text' => 'Berapa Bapak/Ibu sanggup membayar biaya penyedotan lumpur tinja?',

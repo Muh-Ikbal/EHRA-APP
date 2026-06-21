@@ -10,32 +10,40 @@ class EhraQuestionsAirData
 {
     public static function questions(): array
     {
+        $f11Options = [
+            ['value' => 'A', 'label' => 'Air kemasan bermerk'],
+            ['value' => 'B', 'label' => 'Air isi ulang dari depot air minum isi ulang'],
+            ['value' => 'C', 'label' => 'Air ledeng dari PDAM/Proyek/HIPPAM sendiri'],
+            ['value' => 'D', 'label' => 'Air ledeng dari PDAM/Proyek/HIPPAM tetangga'],
+            ['value' => 'E', 'label' => 'Air ledeng eceran dari PDAM/Proyek/HIPPAM'],
+            ['value' => 'F', 'label' => 'Air dari hidran/kran umum – PDAM/HIPPAM/Proyek'],
+            ['value' => 'G', 'label' => 'Air dari terminal air PDAM/HIPPAM/Proyek'],
+            ['value' => 'H', 'label' => 'Air dari sumur bor dengan pompa tangan/listrik/mesin'],
+            ['value' => 'I', 'label' => 'Air dari sumur gali terlindungi sendiri'],
+            ['value' => 'J', 'label' => 'Air dari sumur gali terlindungi tetangga'],
+            ['value' => 'K', 'label' => 'Air dari sumur gali tidak terlindungi sendiri', 'risk' => true],
+            ['value' => 'L', 'label' => 'Air dari sumur gali tidak terlindungi tetangga', 'risk' => true],
+            ['value' => 'M', 'label' => 'Air dari mata air terlindungi'],
+            ['value' => 'N', 'label' => 'Air dari mata air tidak terlindungi', 'risk' => true],
+            ['value' => 'O', 'label' => 'Air hujan (PAH/Penampungan Air Hujan terlindungi)'],
+            ['value' => 'P', 'label' => 'Air dari sungai', 'risk' => true],
+            ['value' => 'Q', 'label' => 'Air dari waduk/danau', 'risk' => true],
+        ];
+
         return [
             // F.1.1 — Matrix sumber air (Minum, Masak, Mencuci, Mandi, Gosok Gigi)
             [
                 'code' => 'F.1.1', 'text' => 'Amati: Sumber air untuk minum, masak, mencuci alat makan, mandi, dan gosok gigi',
-                'type' => 'matrix', 'obs' => true, 'required' => true, 'sort' => 1,
-                'options' => [
-                    ['value' => 'A', 'label' => 'Air kemasan bermerk'],
-                    ['value' => 'B', 'label' => 'Air isi ulang dari depot air minum isi ulang'],
-                    ['value' => 'C', 'label' => 'Air ledeng dari PDAM/Proyek/HIPPAM sendiri'],
-                    ['value' => 'D', 'label' => 'Air ledeng dari PDAM/Proyek/HIPPAM tetangga'],
-                    ['value' => 'E', 'label' => 'Air ledeng eceran dari PDAM/Proyek/HIPPAM'],
-                    ['value' => 'F', 'label' => 'Air dari hidran/kran umum – PDAM/HIPPAM/Proyek'],
-                    ['value' => 'G', 'label' => 'Air dari terminal air PDAM/HIPPAM/Proyek'],
-                    ['value' => 'H', 'label' => 'Air dari sumur bor dengan pompa tangan/listrik/mesin'],
-                    ['value' => 'I', 'label' => 'Air dari sumur gali terlindungi sendiri'],
-                    ['value' => 'J', 'label' => 'Air dari sumur gali terlindungi tetangga'],
-                    ['value' => 'K', 'label' => 'Air dari sumur gali tidak terlindungi sendiri', 'risk' => true],
-                    ['value' => 'L', 'label' => 'Air dari sumur gali tidak terlindungi tetangga', 'risk' => true],
-                    ['value' => 'M', 'label' => 'Air dari mata air terlindungi'],
-                    ['value' => 'N', 'label' => 'Air dari mata air tidak terlindungi', 'risk' => true],
-                    ['value' => 'O', 'label' => 'Air hujan (PAH/Penampungan Air Hujan terlindungi)'],
-                    ['value' => 'P', 'label' => 'Air dari sungai', 'risk' => true],
-                    ['value' => 'Q', 'label' => 'Air dari waduk/danau', 'risk' => true],
-                ],
+                'type' => 'multi_choice', 'obs' => true, 'required' => true, 'sort' => 1,
+                'options' => [],
                 'skip' => null,
-                'note' => 'Matrix: kolom = Minum, Masak, Mencuci Alat Makan & Masak, Mandi, Gosok Gigi. Kode: 0=Tidak, 1=Ya',
+                'children' => [
+                    ['code' => 'F.1.1.A', 'text' => 'Minum', 'type' => 'multi_choice', 'sort' => 1, 'options' => $f11Options],
+                    ['code' => 'F.1.1.B', 'text' => 'Masak', 'type' => 'multi_choice', 'sort' => 2, 'options' => $f11Options],
+                    ['code' => 'F.1.1.C', 'text' => 'Mencuci Alat Makan & Masak', 'type' => 'multi_choice', 'sort' => 3, 'options' => $f11Options],
+                    ['code' => 'F.1.1.D', 'text' => 'Mandi', 'type' => 'multi_choice', 'sort' => 4, 'options' => $f11Options],
+                    ['code' => 'F.1.1.E', 'text' => 'Gosok Gigi', 'type' => 'multi_choice', 'sort' => 5, 'options' => $f11Options],
+                ]
             ],
             [
                 'code' => 'F.1.2', 'text' => 'Amati: Apa wadah/tempat yang digunakan untuk menyimpan air baku untuk air minum di dapur?',
@@ -92,7 +100,7 @@ class EhraQuestionsAirData
                     ['value' => '1', 'label' => 'Di dalam kawasan pagar rumah'],
                     ['value' => '2', 'label' => 'Di luar kawasan pagar rumah'],
                 ],
-                'skip' => [['if_question_code' => 'F.1.7', 'operator' => 'equals', 'value' => '1', 'action' => 'jump', 'target_code' => 'F.1.9']],
+                'skip' => ['1' => 'F.1.9'],
             ],
             [
                 'code' => 'F.1.8', 'text' => 'Jika sumber air di luar kawasan pagar, berapa jarak sumber air minum utama dari rumah?',
@@ -205,7 +213,7 @@ class EhraQuestionsAirData
                     ['value' => '1', 'label' => 'Ya'],
                     ['value' => '2', 'label' => 'Tidak', 'risk' => true],
                 ],
-                'skip' => [['if_question_code' => 'F.2.1', 'operator' => 'equals', 'value' => '2', 'action' => 'jump', 'target_code' => 'F.2.3']],
+                'skip' => ['2' => 'F.2.3'],
             ],
             [
                 'code' => 'F.2.2', 'text' => 'Apa yang biasa ibu lakukan dalam mengolah air agar lebih aman untuk diminum?',
