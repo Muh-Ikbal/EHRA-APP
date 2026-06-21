@@ -13,6 +13,7 @@ class District extends Model
     protected $fillable = [
         'city_id',
         'name',
+        'kemendagri_code'
     ];
 
     public function city()

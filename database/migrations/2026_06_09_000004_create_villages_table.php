@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('villages', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('district_id')->constrained('districts')->cascadeOnDelete();
-            $table->char('kemendagri_code', 10)->unique();
+            $table->char('kemendagri_code', 15)->unique();
             $table->string('name', 100);
-            $table->enum('status', ['perdesaan', 'perkotaan']);
+            $table->enum('status', ['pedesaan', 'perkotaan']);
             $table->tinyInteger('strata')->default(5)->comment('0-5, default 5 = tidak menggunakan strata');
             $table->decimal('centroid_lat', 10, 7)->nullable();
             $table->decimal('centroid_lng', 10, 7)->nullable();

@@ -62,11 +62,15 @@ class LocationController extends Controller
         $level = $request->input('level');
 
         if ($level === 'province') {
-            $validated = $request->validate(['name' => 'required|string|max:100']);
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'kemendagri_code' => 'required'
+            ]);
             Province::create($validated);
         } elseif ($level === 'city') {
             $validated = $request->validate([
                 'province_id' => 'required|exists:provinces,id',
+                'kemendagri_code' => 'required',
                 'name' => 'required|string|max:100',
                 'type' => 'required|in:kabupaten,kota',
                 'geojson' => 'nullable|file|mimes:json,txt',
@@ -79,6 +83,7 @@ class LocationController extends Controller
 
             City::create([
                 'province_id' => $validated['province_id'],
+                'kemendagri_code' => $validated['kemendagri_code'],
                 'name' => $validated['name'],
                 'type' => $validated['type'],
                 'geojson_path' => $path,
@@ -86,6 +91,7 @@ class LocationController extends Controller
         } elseif ($level === 'district') {
             $validated = $request->validate([
                 'city_id' => 'required|exists:cities,id',
+                'kemendagri_code' => 'required',
                 'name' => 'required|string|max:100',
             ]);
             District::create($validated);
@@ -93,8 +99,9 @@ class LocationController extends Controller
             $validated = $request->validate([
                 'district_id' => 'required|exists:districts,id',
                 'name' => 'required|string|max:100',
-                'status' => 'required|in:desa,kelurahan',
+                'status' => 'required|in:pedesaan,perkotaan',
                 'strata' => 'nullable|integer',
+                'kemendagri_code' => 'required',
                 'centroid_lat' => 'nullable|numeric',
                 'centroid_lng' => 'nullable|numeric',
             ]);
@@ -109,17 +116,23 @@ class LocationController extends Controller
         $level = $request->input('level');
 
         if ($level === 'province') {
-            $validated = $request->validate(['name' => 'required|string|max:100']);
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'kemendagri_code' => 'required',
+                
+
+            ]);
             Province::findOrFail($id)->update($validated);
         } elseif ($level === 'city') {
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
                 'type' => 'required|in:kabupaten,kota',
+                'kemendagri_code' => 'required',
                 'geojson' => 'nullable|file|mimes:json,txt',
             ]);
 
             $city = City::findOrFail($id);
-            $data = ['name' => $validated['name'], 'type' => $validated['type']];
+            $data = ['name' => $validated['name'], 'type' => $validated['type'],'kemendagri_code'=>$validated['kemendagri_code']];
             
             if ($request->hasFile('geojson')) {
                 if ($city->geojson_path) Storage::disk('public')->delete($city->geojson_path);
@@ -128,12 +141,16 @@ class LocationController extends Controller
 
             $city->update($data);
         } elseif ($level === 'district') {
-            $validated = $request->validate(['name' => 'required|string|max:100']);
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'kemendagri_code' => 'required',
+            ]);
             District::findOrFail($id)->update($validated);
         } elseif ($level === 'village') {
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
-                'status' => 'required|in:desa,kelurahan',
+                'status' => 'required|in:pedesaan,perkotaan',
+                'kemendagri_code' => 'required',
                 'strata' => 'nullable|integer',
                 'centroid_lat' => 'nullable|numeric',
                 'centroid_lng' => 'nullable|numeric',

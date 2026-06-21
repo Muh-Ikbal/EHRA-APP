@@ -15,6 +15,7 @@ class Village extends Model
         'name',
         'status',
         'strata',
+        'kemendagri_code',
         'centroid_lat',
         'centroid_lng',
     ];

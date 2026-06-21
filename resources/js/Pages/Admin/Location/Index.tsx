@@ -11,6 +11,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
         name: '',
         type: 'kabupaten',
         geojson: null as File | null,
+        kemendagri_code : '',
         status: 'desa',
         strata: '',
         centroid_lat: '',
@@ -34,6 +35,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                 strata: item.strata || '',
                 centroid_lat: item.centroid_lat || '',
                 centroid_lng: item.centroid_lng || '',
+                kemendagri_code: item.kemendagri_code || '',
                 _method: 'post' // inertia workaround for file uploads with PUT
             });
         } else {
@@ -245,8 +247,47 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                 {errors.name && <p className="text-rose-500 text-xs mt-1">{errors.name}</p>}
                             </div>
 
+                            {level === 'province' && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Kode Kemendagri</label>
+                                        <input
+                                            type="text"
+                                            min="0"
+                                            value={data.kemendagri_code}
+                                            onChange={(e) => setData('kemendagri_code', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {level === 'district' && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Kode Kemendagri</label>
+                                        <input
+                                            type="text"
+                                            min="0"
+                                            value={data.kemendagri_code}
+                                            onChange={(e) => setData('kemendagri_code', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                        />
+                                    </div>
+                                </>
+                            )}
                             {level === 'city' && (
                                 <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Kode Kemendagri</label>
+                                        <input
+                                            type="text"
+                                            min="0"
+                                            value={data.kemendagri_code}
+                                            onChange={(e) => setData('kemendagri_code', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                        />
+                                    </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Tipe</label>
                                         <select
@@ -274,6 +315,16 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
 
                             {level === 'village' && (
                                 <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Kode Kemendagri</label>
+                                        <input
+                                            type="text"
+                                            min="0"
+                                            value={data.kemendagri_code}
+                                            onChange={(e) => setData('kemendagri_code', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -282,8 +333,8 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                                 onChange={(e) => setData('status', e.target.value)}
                                                 className="w-full rounded-lg border-gray-300 focus:border-blue-500"
                                             >
-                                                <option value="desa">Desa</option>
-                                                <option value="kelurahan">Kelurahan</option>
+                                                <option value="pedesaan">Pedesaan</option>
+                                                <option value="perkotaan">Perkotaan</option>
                                             </select>
                                         </div>
                                         <div>

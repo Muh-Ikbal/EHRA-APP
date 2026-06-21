@@ -15,6 +15,7 @@ class City extends Model
         'name',
         'type',
         'geojson_path',
+        'kemendagri_code'
     ];
 
     public function province()

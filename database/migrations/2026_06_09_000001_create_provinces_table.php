@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('provinces', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->char('kemendagri_code', 2)->unique();
+            $table->char('kemendagri_code', 15)->unique();
             $table->string('name', 100);
             $table->timestamps();
         });

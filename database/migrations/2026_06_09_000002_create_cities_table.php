@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('cities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('province_id')->constrained('provinces')->cascadeOnDelete();
-            $table->char('kemendagri_code', 4)->unique();
+            $table->char('kemendagri_code', 15)->unique();
             $table->string('name', 100);
             $table->enum('type', ['kabupaten', 'kota']);
             $table->string('geojson_path', 255)->nullable();

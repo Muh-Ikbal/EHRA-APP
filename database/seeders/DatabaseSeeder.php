@@ -15,11 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Admin user (required before questionnaire seeder)
+        if (User::count() === 0) {
+            User::factory()->create([
+                'name'  => 'Administrator EHRA',
+                'email' => 'admin@ehra.go.id',
+                'role'  => 'admin',
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 2. Full EHRA 2026 Questionnaire (sections, questions, options)
+        $this->call(EhraQuestionnaireSeeder::class);
     }
 }

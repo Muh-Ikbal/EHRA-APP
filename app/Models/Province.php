@@ -12,6 +12,7 @@ class Province extends Model
 
     protected $fillable = [
         'name',
+        'kemendagri_code'
     ];
 
     public function cities()
