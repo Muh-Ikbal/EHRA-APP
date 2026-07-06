@@ -1,59 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplikasi EHRA (Environmental Health Risk Assessment)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+EHRA-APP adalah sistem informasi berbasis web yang dirancang khusus untuk memfasilitasi pelaksanaan dan analisis **Penilaian Risiko Kesehatan Lingkungan (EHRA)**. Aplikasi ini memungkinkan pemerintah daerah atau instansi terkait untuk membuat kuesioner dinamis, mengumpulkan data lapangan melalui enumerator, dan secara otomatis menghitung **Indeks Risiko Sanitasi (IRS)** pada tingkat desa/kelurahan.
 
-## About Laravel
+## ✨ Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Builder Kuesioner Dinamis (Form Builder)**
+  Admin dapat membuat dan merancang kuesioner EHRA secara fleksibel. Mendukung berbagai tipe pertanyaan (pilihan ganda, teks, angka) serta pengaturan logika lompat (*skip logic*).
+  
+- **Manajemen Bobot IRS (Indeks Risiko Sanitasi)**
+  Fitur kalkulasi cerdas di mana admin dapat menentukan "Kondisi Risiko" dari setiap jawaban kuesioner dan memberikan bobot (%). Sistem akan menghitung skor IRS setiap desa secara otomatis berdasarkan data yang dikumpulkan.
+  
+- **Aplikasi Enumerator (Mobile-Friendly)**
+  Tampilan antarmuka pengisian survei di lapangan yang dioptimalkan untuk perangkat *mobile*. Mendukung penyimpanan data koordinat lokasi (Geotagging) untuk validitas pemetaan.
+  
+- **Visualisasi Peta & Dashboard**
+  Dilengkapi dengan integrasi pemetaan (Leaflet & GeoJSON) untuk memvisualisasikan tingkat risiko sanitasi per wilayah (misalnya: tingkat risiko tinggi berwarna merah, aman berwarna hijau).
+  
+- **Sistem Role & Multi-Tenancy**
+  Dilengkapi dengan hak akses (Role-Based Access Control) untuk Super Admin, Admin Kabupaten/Kota, dan Enumerator Lapangan.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Teknologi yang Digunakan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Aplikasi ini dibangun menggunakan *stack* teknologi modern untuk menjamin performa dan skalabilitas:
 
-## Learning Laravel
+- **Backend:** Laravel 11 (PHP 8.2+)
+- **Frontend:** React.js 18 dengan TypeScript
+- **Penghubung (Bridge):** Inertia.js (SPA tanpa API berulang)
+- **Styling:** Tailwind CSS & Lucide Icons
+- **Database:** MariaDB / MySQL (Dukungan penuh untuk fitur pencarian JSON)
+- **Pemetaan:** React-Leaflet (GeoJSON Terintegrasi)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🚀 Cara Instalasi (Development)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi ini secara lokal:
 
-## Laravel Sponsors
+1. **Clone repositori**
+   ```bash
+   git clone https://github.com/Muh-Ikbal/EHRA-APP.git
+   cd EHRA-APP
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install Dependensi PHP & Node.js**
+   ```bash
+   composer install
+   npm install
+   ```
 
-### Premium Partners
+3. **Konfigurasi Environment**
+   Salin file konfigurasi lalu sesuaikan pengaturan database Anda:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+4. **Migrasi dan Seeding Database**
+   Jalankan perintah ini untuk membuat struktur tabel sekaligus mengisi data awal (dummy data, akun admin, dll):
+   ```bash
+   php artisan migrate --seed
+   ```
 
-## Contributing
+5. **Jalankan Aplikasi**
+   Anda membutuhkan dua terminal yang berjalan bersamaan:
+   ```bash
+   # Terminal 1 (Menjalankan server PHP/Laravel)
+   php artisan serve
+   
+   # Terminal 2 (Menjalankan Vite build tool untuk React)
+   npm run dev
+   ```
+   Aplikasi dapat diakses melalui `http://localhost:8000`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📚 Hak Akses / Akun Default (Testing)
+*(Opsional: Jika menggunakan Seeder bawaan)*
+- **Email:** admin@ehra.local
+- **Password:** password
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📝 Lisensi
+Proyek ini bersifat tertutup (Proprietary) atau sesuai dengan perjanjian instansi terkait.
