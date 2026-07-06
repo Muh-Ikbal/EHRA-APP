@@ -45,12 +45,11 @@ export default function Builder({ version }: { version: any }) {
         setData({ ...data, sections: newSections });
     };
 
-    // Helper: Add Option
     const addOption = (sectionIdx: number, questionIdx: number) => {
         const newSections = [...data.sections];
         newSections[sectionIdx].questions[questionIdx].options.push({
             id: generateTempId(), option_value: '', option_label: '', 
-            is_risk_flag: false, risk_weight: ''
+            is_risk_flag: false
         });
         setData({ ...data, sections: newSections });
     };
@@ -310,9 +309,6 @@ export default function Builder({ version }: { version: any }) {
                                                                             <input type="checkbox" checked={opt.is_risk_flag} onChange={e => updateItem(e.target.checked, 'is_risk_flag', sIdx, qIdx, oIdx)} className="rounded text-rose-500 focus:ring-rose-500 border-gray-300" />
                                                                             <span className={opt.is_risk_flag ? 'text-rose-700' : 'text-gray-500'}>Beresiko</span>
                                                                         </label>
-                                                                        {opt.is_risk_flag && (
-                                                                            <input type="number" value={opt.risk_weight || ''} onChange={e => updateItem(e.target.value, 'risk_weight', sIdx, qIdx, oIdx)} placeholder="Bobot (%)" className="w-20 text-xs rounded border-rose-200 py-0.5 px-2 bg-white text-rose-700 placeholder-rose-300" />
-                                                                        )}
                                                                     </div>
                                                                     
                                                                     <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 border border-gray-200 rounded">

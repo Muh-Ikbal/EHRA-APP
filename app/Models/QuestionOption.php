@@ -16,7 +16,6 @@ class QuestionOption extends Model
         'option_label',
         'sort_order',
         'is_risk_flag',
-        'risk_weight',
     ];
 
     protected function casts(): array
@@ -24,7 +23,6 @@ class QuestionOption extends Model
         return [
             'sort_order' => 'integer',
             'is_risk_flag' => 'boolean',
-            'risk_weight' => 'decimal:2',
         ];
     }
 

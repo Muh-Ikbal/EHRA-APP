@@ -63,8 +63,8 @@ class User extends Authenticatable
     public function assignedVillages()
     {
         return $this->belongsToMany(Village::class, 'enumerator_villages', 'user_id', 'village_id')
-                    ->withPivot('version_id')
-                    ->withTimestamps();
+                    ->using(EnumeratorVillage::class)
+                    ->withPivot('version_id');
     }
 
     // ─── Helpers ─────────────────────────────────────────────

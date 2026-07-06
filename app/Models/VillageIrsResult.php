@@ -17,8 +17,7 @@ class VillageIrsResult extends Model
         'component_scores',
         'components_snapshot',
         'irs_total',
-        'risk_category',
-        'risk_color',
+        'risk_aspect_category_id',
         'is_published',
         'calculated_at',
     ];
@@ -43,5 +42,10 @@ class VillageIrsResult extends Model
     public function version()
     {
         return $this->belongsTo(QuestionnaireVersion::class, 'version_id');
+    }
+
+    public function riskAspectCategory()
+    {
+        return $this->belongsTo(RiskAspectCategory::class, 'risk_aspect_category_id');
     }
 }

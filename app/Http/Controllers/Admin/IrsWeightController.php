@@ -16,8 +16,8 @@ class IrsWeightController extends Controller
     {
         $version = QuestionnaireVersion::findOrFail($version_id);
         
-        // Fetch IRS components with their associated questions (only choice questions)
-        $components = IrsComponent::orderBy('sort_order')->get();
+        // Fetch IRS components for this version
+        $components = IrsComponent::where('version_id', $version_id)->orderBy('sort_order')->get();
         
         // Fetch choice questions for this version
         $questions = Question::with(['options', 'section'])

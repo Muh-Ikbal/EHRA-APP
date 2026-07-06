@@ -20,6 +20,20 @@ class Village extends Model
         'centroid_lng',
     ];
 
+    protected $appends = ['full_name'];
+
+    public function getFullNameAttribute()
+    {
+        $fullName = $this->name;
+        if ($this->relationLoaded('district') && $this->district) {
+            $fullName .= ' - ' . $this->district->name;
+            if ($this->district->relationLoaded('city') && $this->district->city) {
+                $fullName .= ' - ' . $this->district->city->name;
+            }
+        }
+        return $fullName;
+    }
+
     protected function casts(): array
     {
         return [

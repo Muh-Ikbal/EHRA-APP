@@ -116,7 +116,6 @@ class QuestionnaireBuilderController extends Controller
                                 'option_label' => $oData['option_label'],
                                 'sort_order' => $oIdx,
                                 'is_risk_flag' => $oData['is_risk_flag'] ?? false,
-                                'risk_weight' => $oData['risk_weight'] ?? null,
                             ]
                         );
                         $optionIdsToKeep[] = $option->id;

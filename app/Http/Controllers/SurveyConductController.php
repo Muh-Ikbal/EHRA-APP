@@ -37,28 +37,52 @@ class SurveyConductController extends Controller
             return redirect()->route('dashboard')->with('error', 'Tidak ada kuesioner aktif saat ini.');
         }
 
+        // Fetch authorized villages for the user
+        $user = Auth::user();
+        $assignedVillages = collect();
+
+        if ($user->role === 'admin') {
+            // Admins can survey any village for testing purposes
+            $assignedVillages = Village::with('district.city.province')->orderBy('name')->get();
+        } else {
+            // Enumerators can only survey assigned villages
+            $villageIds = \App\Models\EnumeratorVillage::where('user_id', $user->id)
+                ->where('version_id', $version->id)
+                ->pluck('village_id');
+            $assignedVillages = Village::with('district.city.province')->whereIn('id', $villageIds)->orderBy('name')->get();
+        }
+
         return Inertia::render('Survey/Conduct', [
-            'version' => $version
+            'version' => $version,
+            'assignedVillages' => $assignedVillages
         ]);
     }
 
     public function store(Request $request, QuestionnaireVersion $version)
     {
         $validated = $request->validate([
+            'village_id' => 'required|exists:villages,id',
             'answers' => 'required|array',
         ]);
+
+        $user = Auth::user();
+        
+        // Verify authorization for enumerator
+        if ($user->role !== 'admin') {
+            $isAssigned = \App\Models\EnumeratorVillage::where('user_id', $user->id)
+                ->where('version_id', $version->id)
+                ->where('village_id', $validated['village_id'])
+                ->exists();
+                
+            if (!$isAssigned) {
+                return redirect()->back()->withErrors(['village_id' => 'Anda tidak ditugaskan untuk melakukan survei di desa ini.']);
+            }
+        }
 
         DB::beginTransaction();
 
         try {
-            // Get or create a dummy village for MVP
-            $village = Village::first();
-            if (!$village) {
-                $province = Province::create(['name' => 'SULAWESI TENGGARA']);
-                $city = City::create(['province_id' => $province->id, 'name' => 'KENDARI', 'type' => 'kota']);
-                $district = District::create(['city_id' => $city->id, 'name' => 'KADIA']);
-                $village = Village::create(['district_id' => $district->id, 'name' => 'BONGGOEYA', 'status' => 'kelurahan']);
-            }
+            $village = Village::findOrFail($validated['village_id']);
 
             // Generate Respondent Code (e.g. VIL-DATE-SEQ)
             $villageCount = SurveyResponse::where('village_id', $village->id)->count();
@@ -85,24 +109,37 @@ class SurveyConductController extends Controller
                     Answer::create([
                         'response_id' => $surveyResponse->id,
                         'question_id' => $questionId,
-                        'answer_codes' => json_encode($value),
+                        'answer_codes' => $value,
                     ]);
                 } else {
+                    $answerCodeStr = (string)$value;
                     Answer::create([
                         'response_id' => $surveyResponse->id,
                         'question_id' => $questionId,
                         'answer_value' => $value,
-                        'answer_code' => is_numeric($value) ? $value : null, // Simplistic mapping
+                        'answer_code' => (is_numeric($value) && strlen($answerCodeStr) <= 10) ? $answerCodeStr : null, // Prevent data too long (max 10)
                     ]);
                 }
             }
 
             DB::commit();
 
+            // Trigger EHRA Calculation for this village and version
+            $calcService = new \App\Services\EhraCalculationService();
+            $calcService->calculateForVillage($village->id, $version->id);
+
             return redirect()->route('dashboard')->with('success', 'Survei berhasil dikirim! (Kode Responden: ' . $respondentCode . ')');
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Illuminate\Support\Facades\Log::error('Gagal menyimpan survei', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'village_id' => $request->village_id ?? null,
+            ]);
+
             return redirect()->back()->withErrors(['error' => 'Gagal menyimpan survei: ' . $e->getMessage()]);
         }
     }

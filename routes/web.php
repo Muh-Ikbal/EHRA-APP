@@ -6,11 +6,26 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    $mapData = \App\Models\VillageIrsResult::with(['village', 'riskAspectCategory'])
+        ->where('is_published', true)
+        ->get()
+        ->mapWithKeys(function ($result) {
+            return [
+                $result->village->name => [
+                    'risk' => $result->riskAspectCategory ? $result->riskAspectCategory->category_name : 'Belum Dihitung',
+                    'color' => $result->riskAspectCategory ? $result->riskAspectCategory->color : '#cccccc',
+                    'irs_total' => $result->irs_total,
+                    'total_respondents' => $result->total_respondents,
+                ]
+            ];
+        });
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'mapData' => $mapData,
     ]);
 });
 
@@ -49,6 +64,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/questionnaires/{version}/weights', [\App\Http\Controllers\Admin\IrsWeightController::class, 'index'])->name('questionnaires.weights.index');
         Route::post('/questionnaires/{version}/weights', [\App\Http\Controllers\Admin\IrsWeightController::class, 'store'])->name('questionnaires.weights.store');
         Route::delete('/questionnaires/weights/{id}', [\App\Http\Controllers\Admin\IrsWeightController::class, 'destroy'])->name('questionnaires.weights.destroy');
+        // Survey Results Routes
+        Route::get('/survey-results', [\App\Http\Controllers\Admin\SurveyResultController::class, 'index'])->name('survey-results.index');
+        Route::get('/survey-results/{id}', [\App\Http\Controllers\Admin\SurveyResultController::class, 'show'])->name('survey-results.show');
+        Route::get('/survey-results/{id}/edit', [\App\Http\Controllers\Admin\SurveyResultController::class, 'edit'])->name('survey-results.edit');
+        Route::put('/survey-results/{id}', [\App\Http\Controllers\Admin\SurveyResultController::class, 'update'])->name('survey-results.update');
+        Route::patch('/survey-results/{id}/status', [\App\Http\Controllers\Admin\SurveyResultController::class, 'updateStatus'])->name('survey-results.updateStatus');
+        Route::post('/survey-results/{id}/recalculate-irs', [\App\Http\Controllers\Admin\SurveyResultController::class, 'recalculateIrs'])->name('survey-results.recalculate');
+
+        // Risk Aspect Categories
+        Route::resource('/risk-categories', \App\Http\Controllers\RiskAspectCategoryController::class);
+
+        // Enumerators
+        Route::resource('/enumerators', \App\Http\Controllers\Admin\EnumeratorController::class);
     });
 });
 

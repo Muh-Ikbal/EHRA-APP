@@ -1,7 +1,7 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, Users, FileText, Settings, Menu, Bell, Map, PieChart, MapPin } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Menu, Bell, Map, PieChart, MapPin, ShieldAlert } from 'lucide-react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
 export default function Authenticated({
@@ -16,10 +16,11 @@ export default function Authenticated({
         { name: 'Mulai Survei', href: route('survey.conduct'), icon: Users, active: route().current('survey.*') },
         { name: 'Manajemen Lokasi', href: route('admin.locations.index'), icon: MapPin, active: route().current('admin.locations.*') },
         { name: 'Manajemen Kuesioner', href: route('admin.questionnaires.index'), icon: FileText, active: route().current('admin.questionnaires.*') },
-        { name: 'Manajemen Survei', href: '#', icon: FileText, active: false },
+        { name: 'Hasil Survei', href: route('admin.survey-results.index'), icon: FileText, active: route().current('admin.survey-results.*') },
+        { name: 'Kategori Risiko', href: route('admin.risk-categories.index'), icon: ShieldAlert, active: route().current('admin.risk-categories.*') },
         { name: 'Peta Risiko', href: '#', icon: Map, active: false },
         { name: 'Laporan EHRA', href: '#', icon: PieChart, active: false },
-        { name: 'Enumerator', href: '#', icon: Users, active: false },
+        { name: 'Enumerator', href: route('admin.enumerators.index'), icon: Users, active: route().current('admin.enumerators.*') },
         { name: 'Pengaturan', href: '#', icon: Settings, active: false },
     ];
 

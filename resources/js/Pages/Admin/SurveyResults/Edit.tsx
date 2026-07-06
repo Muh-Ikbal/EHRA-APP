@@ -3,46 +3,14 @@ import { Head, router } from '@inertiajs/react';
 import { ChevronRight, ChevronLeft, Send, CheckCircle2, AlertCircle, MapPin } from 'lucide-react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Conduct({ version, auth, assignedVillages = [] }: any) {
-    // Initialize state from localStorage if available
-    const [answers, setAnswers] = useState<Record<string, any>>(() => {
-        const saved = localStorage.getItem('ehra_survey_answers');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error("Failed to parse saved answers", e);
-            }
-        }
-        return {};
-    });
+export default function Edit({ version, response, initialAnswers }: any) {
+    // Use initialAnswers provided by the controller
+    const [answers, setAnswers] = useState<Record<string, any>>(initialAnswers || {});
 
-    const [currentSectionIdx, setCurrentSectionIdx] = useState(() => {
-        const saved = localStorage.getItem('ehra_survey_section');
-        return saved ? parseInt(saved, 10) : 0;
-    });
-
+    const [currentSectionIdx, setCurrentSectionIdx] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Auto-select if only 1 village, or load from localStorage
-    const [selectedVillageId, setSelectedVillageId] = useState<string>(() => {
-        const saved = localStorage.getItem('ehra_survey_village');
-        if (saved) return saved;
-        return assignedVillages.length === 1 ? assignedVillages[0].id : '';
-    });
-
-    // Save to localStorage whenever state changes
-    useEffect(() => {
-        localStorage.setItem('ehra_survey_answers', JSON.stringify(answers));
-    }, [answers]);
-
-    useEffect(() => {
-        localStorage.setItem('ehra_survey_section', currentSectionIdx.toString());
-    }, [currentSectionIdx]);
-
-    useEffect(() => {
-        localStorage.setItem('ehra_survey_village', selectedVillageId);
-    }, [selectedVillageId]);
+    const selectedVillageId = response.village_id;
 
     const sections = version.sections || [];
     const currentSection = sections[currentSectionIdx];
@@ -56,47 +24,8 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
         return qlist;
     }, [sections]);
 
-    // Auto-fill Identity questions based on selected village
-    useEffect(() => {
-        if (!selectedVillageId || allQuestions.length === 0) return;
-        
-        const village = assignedVillages.find((v: any) => v.id === selectedVillageId);
-        if (!village) return;
-
-        setAnswers(prev => {
-            const newAnswers = { ...prev };
-            let hasChanges = false;
-            
-            allQuestions.forEach((q: any) => {
-                if (q.code === 'ID.1' && village.district?.city?.province?.kemendagri_code) {
-                    if (newAnswers[q.id] !== village.district.city.province.kemendagri_code) {
-                        newAnswers[q.id] = village.district.city.province.kemendagri_code;
-                        hasChanges = true;
-                    }
-                }
-                if (q.code === 'ID.2' && village.district?.city?.kemendagri_code) {
-                    if (newAnswers[q.id] !== village.district.city.kemendagri_code) {
-                        newAnswers[q.id] = village.district.city.kemendagri_code;
-                        hasChanges = true;
-                    }
-                }
-                if (q.code === 'ID.3' && village.district?.kemendagri_code) {
-                    if (newAnswers[q.id] !== village.district.kemendagri_code) {
-                        newAnswers[q.id] = village.district.kemendagri_code;
-                        hasChanges = true;
-                    }
-                }
-                if (q.code === 'ID.4' && village.kemendagri_code) {
-                    if (newAnswers[q.id] !== village.kemendagri_code) {
-                        newAnswers[q.id] = village.kemendagri_code;
-                        hasChanges = true;
-                    }
-                }
-            });
-
-            return hasChanges ? newAnswers : prev;
-        });
-    }, [selectedVillageId, assignedVillages, allQuestions]);
+    // No auto-fill needed for edit, as they are already filled.
+    // If they were empty, we leave them or let admin fill them.
 
     // Calculate which questions are visible based on skip logic
     const visibleQuestionIds = useMemo(() => {
@@ -175,7 +104,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
             return;
         }
 
-        if (!confirm('Kirim survei ini? Data tidak dapat diubah setelah dikirim.')) return;
+        if (!confirm('Simpan perubahan pada survei ini? Data akan menghitung ulang skor desa.')) return;
         
         setIsSubmitting(true);
         
@@ -187,16 +116,11 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
             }
         }
 
-        router.post(route('survey.store', version.id), { 
-            village_id: selectedVillageId,
+        router.put(route('admin.survey-results.update', response.id), { 
             answers: filteredAnswers 
         }, {
             onSuccess: () => {
                 setIsSubmitting(false);
-                // Clear localStorage on success
-                localStorage.removeItem('ehra_survey_answers');
-                localStorage.removeItem('ehra_survey_section');
-                localStorage.removeItem('ehra_survey_village');
             },
             onError: () => setIsSubmitting(false),
         });
@@ -209,14 +133,14 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
         <AuthenticatedLayout
             header={
                 <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-gray-800 tracking-tight">Pelaksanaan Survei</h2>
+                    <h2 className="text-xl font-bold text-gray-800 tracking-tight">Edit Hasil Survei</h2>
                     <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase">
-                        {version.version_code}
+                        {response.respondent_code}
                     </span>
                 </div>
             }
         >
-            <Head title="Pelaksanaan Survei" />
+            <Head title={`Edit Survei ${response.respondent_code}`} />
 
             <div className="max-w-4xl mx-auto pb-12">
                 {/* Progress Bar */}
@@ -233,40 +157,18 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                     </div>
                 </div>
 
-                {/* Village Selection Box */}
-                {assignedVillages.length === 0 ? (
-                    <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center text-rose-700 mb-6">
-                        <AlertCircle className="mx-auto mb-2" size={32} />
-                        <h3 className="font-bold text-lg">Tidak Ada Tugas Desa</h3>
-                        <p className="mt-1">Anda belum ditugaskan untuk melakukan survei di desa manapun. Silakan hubungi admin.</p>
-                    </div>
-                ) : (
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                        <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                            <MapPin size={18} className="text-blue-600" />
-                            Lokasi Survei (Desa / Kelurahan) <span className="text-rose-500">*</span>
-                        </label>
-                        <select
-                            value={selectedVillageId}
-                            onChange={(e) => setSelectedVillageId(e.target.value)}
-                            disabled={assignedVillages.length === 1}
-                            className="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm disabled:bg-gray-50 disabled:text-gray-500 font-medium"
-                        >
-                            <option value="">-- Pilih Lokasi Desa/Kelurahan --</option>
-                            {assignedVillages.map((village: any) => (
-                                <option key={village.id} value={village.id}>
-                                    {village.full_name || village.name}
-                                </option>
-                            ))}
-                        </select>
-                        {assignedVillages.length === 1 && (
-                            <p className="text-xs text-gray-500 mt-2">Anda hanya ditugaskan di 1 desa, lokasi ini telah dipilih otomatis.</p>
-                        )}
-                    </div>
-                )}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
+                        <MapPin size={18} className="text-blue-600" />
+                        Lokasi Survei Responden
+                    </label>
+                    <p className="font-semibold text-gray-900 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        {response.respondent_code} (Sedang Edit)
+                    </p>
+                </div>
 
                 {/* Section Content */}
-                {currentSection && assignedVillages.length > 0 && (
+                {currentSection && (
                     <div className="space-y-6">
                         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/3 -translate-y-1/3">
@@ -412,9 +314,9 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                             disabled={isSubmitting}
                             className="px-8 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
-                            {isSubmitting ? 'Memproses...' : (
+                            {isSubmitting ? 'Menyimpan...' : (
                                 <>
-                                    <Send size={20} /> Kirim Survei Final
+                                    <Send size={20} /> Simpan Perubahan
                                 </>
                             )}
                         </button>

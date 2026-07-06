@@ -26,5 +26,8 @@ class DatabaseSeeder extends Seeder
 
         // 2. Full EHRA 2026 Questionnaire (sections, questions, options)
         $this->call(EhraQuestionnaireSeeder::class);
+
+        // 3. Location Seeder (Provinces, Cities, Districts, Villages & Dummy IRS Results)
+        $this->call(LocationSeeder::class);
     }
 }
