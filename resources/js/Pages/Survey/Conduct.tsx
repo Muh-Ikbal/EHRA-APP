@@ -210,7 +210,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
             header={
                 <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-gray-800 tracking-tight">Pelaksanaan Survei</h2>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase">
+                    <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase">
                         {version.version_code}
                     </span>
                 </div>
@@ -223,11 +223,11 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                 <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
                     <div className="flex items-center justify-between text-sm font-medium text-gray-500 mb-2">
                         <span>Bagian {currentSectionIdx + 1} dari {sections.length}</span>
-                        <span className="text-blue-600">{Math.round(progressPercentage)}% Selesai</span>
+                        <span className="text-emerald-700">{Math.round(progressPercentage)}% Selesai</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
                         <div 
-                            className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
+                            className="bg-emerald-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
                             style={{ width: `${progressPercentage}%` }}
                         ></div>
                     </div>
@@ -243,14 +243,14 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                 ) : (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                         <label className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-3">
-                            <MapPin size={18} className="text-blue-600" />
+                            <MapPin size={18} className="text-emerald-700" />
                             Lokasi Survei (Desa / Kelurahan) <span className="text-rose-500">*</span>
                         </label>
                         <select
                             value={selectedVillageId}
                             onChange={(e) => setSelectedVillageId(e.target.value)}
                             disabled={assignedVillages.length === 1}
-                            className="w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500 shadow-sm disabled:bg-gray-50 disabled:text-gray-500 font-medium"
+                            className="w-full rounded-xl border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 shadow-sm disabled:bg-gray-50 disabled:text-gray-500 font-medium"
                         >
                             <option value="">-- Pilih Lokasi Desa/Kelurahan --</option>
                             {assignedVillages.map((village: any) => (
@@ -268,13 +268,13 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                 {/* Section Content */}
                 {currentSection && assignedVillages.length > 0 && (
                     <div className="space-y-6">
-                        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+                        <div className="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
                             <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/3 -translate-y-1/3">
                                 <AlertCircle size={200} />
                             </div>
                             <h2 className="text-3xl font-extrabold mb-2 relative z-10">{currentSection.code}. {currentSection.title}</h2>
                             {currentSection.description && (
-                                <p className="text-blue-100 text-lg relative z-10">{currentSection.description}</p>
+                                <p className="text-emerald-100 text-lg relative z-10">{currentSection.description}</p>
                             )}
                         </div>
 
@@ -285,7 +285,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                 <div key={q.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 transition-all hover:shadow-md">
                                     <div className="flex gap-4">
                                         <div className="shrink-0">
-                                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 font-bold text-lg border border-blue-100">
+                                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-50 text-emerald-800 font-bold text-lg border border-emerald-100">
                                                 {q.code}
                                             </span>
                                         </div>
@@ -308,7 +308,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                                         {q.options?.map((opt: any) => (
                                                             <label 
                                                                 key={opt.id} 
-                                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${answers[q.id] === opt.option_value ? 'border-blue-500 bg-blue-50/50' : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50'}`}
+                                                                className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${answers[q.id] === opt.option_value ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-100 hover:border-emerald-200 hover:bg-gray-50'}`}
                                                             >
                                                                 <input 
                                                                     type="radio" 
@@ -316,7 +316,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                                                     value={opt.option_value}
                                                                     checked={answers[q.id] === opt.option_value}
                                                                     onChange={() => handleChange(q.id, opt.option_value)}
-                                                                    className="w-5 h-5 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                                                    className="w-5 h-5 text-emerald-700 border-gray-300 focus:ring-emerald-500"
                                                                 />
                                                                 <span className="flex-1 text-gray-700 font-medium">{opt.option_label}</span>
                                                             </label>
@@ -353,7 +353,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                                         type="text" 
                                                         value={answers[q.id] || ''}
                                                         onChange={(e) => handleChange(q.id, e.target.value)}
-                                                        className={`w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 p-4 shadow-sm ${['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? 'bg-gray-50 text-gray-600 font-bold' : ''}`}
+                                                        className={`w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 p-4 shadow-sm ${['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? 'bg-gray-50 text-gray-600 font-bold' : ''}`}
                                                         placeholder={['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? "Terisi otomatis" : "Ketik jawaban di sini..."}
                                                         readOnly={['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code)}
                                                     />
@@ -365,7 +365,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                                         type="number" 
                                                         value={answers[q.id] || ''}
                                                         onChange={(e) => handleChange(q.id, e.target.value)}
-                                                        className={`w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 p-4 shadow-sm text-lg ${['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? 'bg-gray-50 text-gray-600 font-bold' : ''}`}
+                                                        className={`w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 p-4 shadow-sm text-lg ${['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? 'bg-gray-50 text-gray-600 font-bold' : ''}`}
                                                         placeholder={['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code) ? "" : "0"}
                                                         readOnly={['ID.1', 'ID.2', 'ID.3', 'ID.4'].includes(q.code)}
                                                     />
@@ -377,7 +377,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                                                         type="date" 
                                                         value={answers[q.id] || ''}
                                                         onChange={(e) => handleChange(q.id, e.target.value)}
-                                                        className="w-full rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 p-4 shadow-sm"
+                                                        className="w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 p-4 shadow-sm"
                                                     />
                                                 )}
                                             </div>
@@ -402,7 +402,7 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                     {currentSectionIdx < sections.length - 1 ? (
                         <button 
                             onClick={handleNext}
-                            className="px-8 py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                            className="px-8 py-3 rounded-xl font-bold text-white bg-emerald-700 hover:bg-emerald-800 flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
                             Selanjutnya <ChevronRight size={20} />
                         </button>

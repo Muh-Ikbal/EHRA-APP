@@ -134,7 +134,7 @@ export default function Builder({ version }: { version: any }) {
                     <button
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
                     >
                         <Save size={16} />
                         {isSaving ? 'Menyimpan...' : 'Simpan Kuesioner'}
@@ -150,14 +150,14 @@ export default function Builder({ version }: { version: any }) {
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 sticky top-6">
                         <button 
                             onClick={() => setActiveTab('components')}
-                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium transition-colors ${activeTab === 'components' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium transition-colors ${activeTab === 'components' ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-50'}`}
                         >
                             <ShieldAlert size={18} />
                             Komponen IRS
                         </button>
                         <button 
                             onClick={() => setActiveTab('editor')}
-                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium transition-colors ${activeTab === 'editor' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium transition-colors ${activeTab === 'editor' ? 'bg-emerald-50 text-emerald-800' : 'text-gray-600 hover:bg-gray-50'}`}
                         >
                             <Layers size={18} />
                             Editor Kuesioner
@@ -190,11 +190,11 @@ export default function Builder({ version }: { version: any }) {
                                         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-500 mb-1">Key (Unik)</label>
-                                                <input type="text" value={comp.key} onChange={e => updateComponent(idx, 'key', e.target.value)} className="w-full text-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" placeholder="contoh: air_minum" />
+                                                <input type="text" value={comp.key} onChange={e => updateComponent(idx, 'key', e.target.value)} className="w-full text-sm rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="contoh: air_minum" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-500 mb-1">Label Tampilan</label>
-                                                <input type="text" value={comp.label} onChange={e => updateComponent(idx, 'label', e.target.value)} className="w-full text-sm rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" placeholder="contoh: Sumber Air Minum" />
+                                                <input type="text" value={comp.label} onChange={e => updateComponent(idx, 'label', e.target.value)} className="w-full text-sm rounded-lg border-gray-300 focus:border-emerald-500 focus:ring-emerald-500" placeholder="contoh: Sumber Air Minum" />
                                             </div>
                                         </div>
                                         <button onClick={() => deleteItem('component', idx)} className="pt-2 text-rose-400 hover:text-rose-600">
@@ -219,11 +219,11 @@ export default function Builder({ version }: { version: any }) {
                                         <div className="flex items-start gap-4">
                                             <div className="w-20 shrink-0">
                                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kode</label>
-                                                <input type="text" value={section.code} onChange={e => updateItem(e.target.value, 'code', sIdx)} className="w-full text-sm rounded-lg border-gray-300 focus:border-blue-500 font-bold" placeholder="A" />
+                                                <input type="text" value={section.code} onChange={e => updateItem(e.target.value, 'code', sIdx)} className="w-full text-sm rounded-lg border-gray-300 focus:border-emerald-500 font-bold" placeholder="A" />
                                             </div>
                                             <div className="flex-1">
                                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Judul Bagian</label>
-                                                <input type="text" value={section.title} onChange={e => updateItem(e.target.value, 'title', sIdx)} className="w-full text-sm rounded-lg border-gray-300 focus:border-blue-500 font-bold" placeholder="Informasi Umum" />
+                                                <input type="text" value={section.title} onChange={e => updateItem(e.target.value, 'title', sIdx)} className="w-full text-sm rounded-lg border-gray-300 focus:border-emerald-500 font-bold" placeholder="Informasi Umum" />
                                             </div>
                                             <div className="w-48 shrink-0">
                                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Pilar IRS (Opsional)</label>
@@ -237,7 +237,7 @@ export default function Builder({ version }: { version: any }) {
                                                             return { ...prev, sections: newSections };
                                                         });
                                                     }} 
-                                                    className="w-full text-sm rounded-lg border-gray-300 focus:border-blue-500"
+                                                    className="w-full text-sm rounded-lg border-gray-300 focus:border-emerald-500"
                                                 >
                                                     <option value="">-- Bukan Penilaian --</option>
                                                     {data.irsComponents.map(c => (
@@ -263,13 +263,13 @@ export default function Builder({ version }: { version: any }) {
                                                 <div className="flex-1 p-5">
                                                     <div className="flex gap-4 items-start mb-4">
                                                         <div className="w-16 shrink-0">
-                                                            <input type="text" value={question.code} onChange={e => updateItem(e.target.value, 'code', sIdx, qIdx)} className="w-full text-sm rounded border-gray-300 px-2 py-1.5 focus:border-blue-500" placeholder="A.1" />
+                                                            <input type="text" value={question.code} onChange={e => updateItem(e.target.value, 'code', sIdx, qIdx)} className="w-full text-sm rounded border-gray-300 px-2 py-1.5 focus:border-emerald-500" placeholder="A.1" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <textarea value={question.question_text} onChange={e => updateItem(e.target.value, 'question_text', sIdx, qIdx)} rows={2} className="w-full text-sm rounded border-gray-300 focus:border-blue-500" placeholder="Tulis pertanyaan..." />
+                                                            <textarea value={question.question_text} onChange={e => updateItem(e.target.value, 'question_text', sIdx, qIdx)} rows={2} className="w-full text-sm rounded border-gray-300 focus:border-emerald-500" placeholder="Tulis pertanyaan..." />
                                                         </div>
                                                         <div className="w-40 shrink-0">
-                                                            <select value={question.question_type} onChange={e => updateItem(e.target.value, 'question_type', sIdx, qIdx)} className="w-full text-sm rounded border-gray-300 focus:border-blue-500 bg-gray-50">
+                                                            <select value={question.question_type} onChange={e => updateItem(e.target.value, 'question_type', sIdx, qIdx)} className="w-full text-sm rounded border-gray-300 focus:border-emerald-500 bg-gray-50">
                                                                 <option value="single_choice">Pilihan Ganda (1)</option>
                                                                 <option value="multi_choice">Pilihan Ganda (&gt;1)</option>
                                                                 <option value="text">Teks Bebas</option>
@@ -285,23 +285,23 @@ export default function Builder({ version }: { version: any }) {
                                                     {/* Additional Settings */}
                                                     <div className="flex items-center gap-6 mb-4 text-sm text-gray-600 bg-gray-50 py-2 px-3 rounded-lg border border-gray-100">
                                                         <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input type="checkbox" checked={question.is_required} onChange={e => updateItem(e.target.checked, 'is_required', sIdx, qIdx)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                                            <input type="checkbox" checked={question.is_required} onChange={e => updateItem(e.target.checked, 'is_required', sIdx, qIdx)} className="rounded border-gray-300 text-emerald-700 focus:ring-emerald-500" />
                                                             Wajib Diisi
                                                         </label>
                                                         <label className="flex items-center gap-2 cursor-pointer">
-                                                            <input type="checkbox" checked={question.is_observation} onChange={e => updateItem(e.target.checked, 'is_observation', sIdx, qIdx)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                                            <input type="checkbox" checked={question.is_observation} onChange={e => updateItem(e.target.checked, 'is_observation', sIdx, qIdx)} className="rounded border-gray-300 text-emerald-700 focus:ring-emerald-500" />
                                                             <span className="flex items-center gap-1">Pengamatan Lapangan <HelpCircle size={14} className="text-gray-400" title="Ditanyakan bukan ke responden, tapi diamati oleh enumerator" /></span>
                                                         </label>
                                                     </div>
 
                                                     {/* Options for Choice Types */}
                                                     {['single_choice', 'multi_choice'].includes(question.question_type) && (
-                                                        <div className="pl-6 border-l-2 border-blue-100 space-y-3 mt-4">
+                                                        <div className="pl-6 border-l-2 border-emerald-100 space-y-3 mt-4">
                                                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilihan Jawaban & Risiko</h4>
                                                             {question.options.map((opt: any, oIdx: number) => (
                                                                 <div key={opt.id} className="flex gap-3 items-start bg-white">
-                                                                    <input type="text" value={opt.option_value} onChange={e => updateItem(e.target.value, 'option_value', sIdx, qIdx, oIdx)} className="w-16 text-sm rounded border-gray-300 py-1.5 focus:border-blue-500" placeholder="Kode" />
-                                                                    <input type="text" value={opt.option_label} onChange={e => updateItem(e.target.value, 'option_label', sIdx, qIdx, oIdx)} className="flex-1 text-sm rounded border-gray-300 py-1.5 focus:border-blue-500" placeholder="Label jawaban..." />
+                                                                    <input type="text" value={opt.option_value} onChange={e => updateItem(e.target.value, 'option_value', sIdx, qIdx, oIdx)} className="w-16 text-sm rounded border-gray-300 py-1.5 focus:border-emerald-500" placeholder="Kode" />
+                                                                    <input type="text" value={opt.option_label} onChange={e => updateItem(e.target.value, 'option_label', sIdx, qIdx, oIdx)} className="flex-1 text-sm rounded border-gray-300 py-1.5 focus:border-emerald-500" placeholder="Label jawaban..." />
                                                                     
                                                                     {/* Risk Setting */}
                                                                     <div className={`flex items-center gap-2 px-3 py-1.5 rounded border transition-colors ${opt.is_risk_flag ? 'bg-rose-50 border-rose-200' : 'bg-gray-50 border-gray-200'}`}>
@@ -326,7 +326,7 @@ export default function Builder({ version }: { version: any }) {
                                                                                 }
                                                                                 updateItem(Object.keys(newLogic).length > 0 ? newLogic : null, 'skip_logic', sIdx, qIdx);
                                                                             }} 
-                                                                            className="w-16 text-xs rounded border-gray-300 py-0.5 px-2 focus:border-blue-500" 
+                                                                            className="w-16 text-xs rounded border-gray-300 py-0.5 px-2 focus:border-emerald-500" 
                                                                             placeholder="Kode Q" 
                                                                         />
                                                                     </div>
@@ -336,7 +336,7 @@ export default function Builder({ version }: { version: any }) {
                                                                     </button>
                                                                 </div>
                                                             ))}
-                                                            <button onClick={() => addOption(sIdx, qIdx)} className="text-xs text-blue-600 font-medium flex items-center gap-1 mt-2 hover:text-blue-800">
+                                                            <button onClick={() => addOption(sIdx, qIdx)} className="text-xs text-emerald-700 font-medium flex items-center gap-1 mt-2 hover:text-emerald-800">
                                                                 <Plus size={14} /> Tambah Opsi
                                                             </button>
                                                         </div>
@@ -352,7 +352,7 @@ export default function Builder({ version }: { version: any }) {
                                 </div>
                             ))}
 
-                            <button onClick={addSection} className="w-full py-4 bg-gray-50 border-2 border-dashed border-blue-200 rounded-2xl text-blue-600 font-bold hover:bg-blue-50 hover:border-blue-300 transition-colors flex items-center justify-center gap-2">
+                            <button onClick={addSection} className="w-full py-4 bg-gray-50 border-2 border-dashed border-emerald-300 rounded-2xl text-emerald-700 font-bold hover:bg-emerald-50 hover:border-emerald-400 transition-colors flex items-center justify-center gap-2">
                                 <Plus size={20} /> Tambah Bagian Baru (Section)
                             </button>
                         </div>

@@ -39,9 +39,11 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "chart.js": "^4.5.1",
         "dayjs": "^1.11.21",
         "leaflet": "^1.9.4",
         "lucide-react": "^1.17.0",
+        "react-chartjs-2": "^5.3.1",
         "react-leaflet": "^4.2.1"
     }
 }

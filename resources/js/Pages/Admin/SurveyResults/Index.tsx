@@ -1,8 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
-import { FileText, Eye, CheckCircle2, Clock } from 'lucide-react';
+import { FileText, Eye, CheckCircle2, Clock, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 
 interface SurveyResponse {
     id: string;
@@ -26,6 +27,20 @@ interface PaginationData {
 }
 
 export default function Index({ auth, responses, filters }: PageProps<{ responses: PaginationData; filters: any }>) {
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDelete = () => {
+        if (!deleteId) return;
+        setDeleting(true);
+        router.delete(route('admin.survey-results.destroy', deleteId), {
+            onFinish: () => {
+                setDeleting(false);
+                setDeleteId(null);
+            },
+        });
+    };
+
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Hasil Survei</h2>}
@@ -74,7 +89,7 @@ export default function Index({ auth, responses, filters }: PageProps<{ response
                                                     <CheckCircle2 size={14} /> Approved
                                                 </span>
                                             ) : res.status === 'reviewed' ? (
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold border border-blue-200">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-md text-xs font-bold border border-emerald-200">
                                                     <CheckCircle2 size={14} /> Reviewed
                                                 </span>
                                             ) : res.status === 'submitted' ? (
@@ -88,12 +103,20 @@ export default function Index({ auth, responses, filters }: PageProps<{ response
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <Link
-                                                href={route('admin.survey-results.show', res.id)}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-sm"
-                                            >
-                                                <Eye size={16} /> Detail
-                                            </Link>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={route('admin.survey-results.show', res.id)}
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all shadow-sm"
+                                                >
+                                                    <Eye size={16} /> Detail
+                                                </Link>
+                                                <button
+                                                    onClick={() => setDeleteId(res.id)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all shadow-sm"
+                                                >
+                                                    <Trash2 size={16} /> Hapus
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -125,7 +148,7 @@ export default function Index({ auth, responses, filters }: PageProps<{ response
                                     href={link.url || '#'}
                                     className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
                                         link.active 
-                                            ? 'bg-blue-600 text-white' 
+                                            ? 'bg-emerald-700 text-white' 
                                             : link.url 
                                                 ? 'text-gray-600 hover:bg-gray-100' 
                                                 : 'text-gray-300 cursor-not-allowed'
@@ -137,6 +160,39 @@ export default function Index({ auth, responses, filters }: PageProps<{ response
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {deleteId && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4 border border-gray-100">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                                <Trash2 size={20} className="text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900">Hapus Data Survei?</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-6">
+                            Data survei ini akan dihapus secara permanen beserta seluruh jawabannya. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                disabled={deleting}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleting}
+                                className="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                                {deleting ? 'Menghapus...' : 'Ya, Hapus'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

@@ -1,466 +1,432 @@
 import { PageProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, TrendingUp, Users } from 'lucide-react';
-import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON, useMap } from 'react-leaflet';
-import { useEffect, useState } from 'react';
+import { Activity } from 'lucide-react';
+import { MapContainer, TileLayer, GeoJSON, CircleMarker, useMap } from 'react-leaflet';
+import { useEffect, useState, useMemo } from 'react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
 
-// We will use real data from backend passed via mapData prop.
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-function MapController({ geoData, selectedKabupaten }: { geoData: any, selectedKabupaten: string }) {
+interface RiskCategory {
+    name: string;
+    color: string;
+    lower_bound: number;
+    upper_bound: number;
+}
+
+interface VillageData {
+    risk: string;
+    color: string;
+    irs_total: number;
+    total_respondents: number;
+    village_name: string;
+    district_name: string;
+    city_name: string;
+    kemendagri_code: string;
+    component_scores: Record<string, { label: string; score: number }>;
+}
+
+interface WelcomeProps {
+    laravelVersion: string;
+    phpVersion: string;
+    mapData?: Record<string, VillageData>;
+    riskCategories?: RiskCategory[];
+    cityList?: string[];
+}
+
+function MapController({ geoData, selectedKabupaten }: { geoData: any; selectedKabupaten: string }) {
     const map = useMap();
-
     useEffect(() => {
         if (!geoData) return;
-
-        if (!selectedKabupaten) {
-            // Zoom back to default Sultra view
-            map.setView([-4.14491, 122.174605], 7);
-            return;
-        }
-
+        if (!selectedKabupaten) { map.setView([-4.14491, 122.174605], 7); return; }
         const features = geoData.features.filter((f: any) => f.properties?.WADMKK === selectedKabupaten);
         if (features.length > 0) {
             const layer = L.geoJSON(features);
             const bounds = layer.getBounds();
-            if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [20, 20] });
-            }
+            if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
         }
     }, [geoData, selectedKabupaten, map]);
-
     return null;
 }
 
+function getPolygonCentroid(feature: any): [number, number] | null {
+    try {
+        const coords = feature.geometry.type === 'MultiPolygon'
+            ? feature.geometry.coordinates[0][0]
+            : feature.geometry.coordinates[0];
+        let latSum = 0, lngSum = 0;
+        coords.forEach((c: number[]) => { lngSum += c[0]; latSum += c[1]; });
+        return [latSum / coords.length, lngSum / coords.length];
+    } catch { return null; }
+}
+
 export default function Welcome({
-    auth,
-    laravelVersion,
-    phpVersion,
-    mapData = {},
-}: PageProps<{ laravelVersion: string; phpVersion: string; mapData?: Record<string, any> }>) {
+    auth, mapData = {}, riskCategories = [], cityList = [],
+}: PageProps<WelcomeProps>) {
     const [geoData, setGeoData] = useState<any>(null);
     const [selectedKabupaten, setSelectedKabupaten] = useState<string>('');
-    const [kabupatenList, setKabupatenList] = useState<string[]>([]);
+    const [selectedRow, setSelectedRow] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/data/sultra.geojson')
             .then(res => res.json())
-            .then(data => {
-                setGeoData(data);
-                if (data && data.features) {
-                    const uniqueKabupaten = Array.from(new Set(data.features.map((f: any) => f.properties?.WADMKK))).filter(Boolean) as string[];
-                    setKabupatenList(uniqueKabupaten.sort());
-                }
-            })
+            .then(data => setGeoData(data))
             .catch(err => console.error("Error loading geojson", err));
     }, []);
 
-    const styleFeature = (feature: any) => {
-        const desaName = feature?.properties?.WADMKD || '';
-        const villageData = mapData[desaName];
+    const getVillageData = (props: any): VillageData | null => {
+        if (!props) return null;
+        const key = `${props.WADMKK || ''}_${props.WADMKC || ''}_${props.WADMKD || ''}`.toUpperCase();
+        return mapData[key] || null;
+    };
 
+    const styleFeature = (feature: any) => ({
+        fillColor: getVillageData(feature?.properties)?.color || '#e5e7eb',
+        weight: 1, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.5,
+    });
+
+    const onEachFeature = (feature: any, layer: any) => {
+        const vd = getVillageData(feature.properties);
+        const name = feature.properties?.WADMKD || 'Unknown';
+        const kec = feature.properties?.WADMKC || '';
+        const risk = vd ? vd.risk : 'Belum Dianalisis';
+        const info = vd ? `Responden: ${vd.total_respondents} | IRS: ${vd.irs_total}` : 'Belum ada data';
+        layer.bindPopup(`<div style="font-family:sans-serif;min-width:140px"><b>${name}</b><br/><small>Kec. ${kec}</small><br/><small>${info}</small><br/><small style="color:${vd?.color || '#999'}">● ${risk}</small></div>`);
+        layer.on({
+            mouseover: (e: any) => { e.target.setStyle({ weight: 2, color: '#0f172a', dashArray: '', fillOpacity: 0.8 }); e.target.bringToFront(); },
+            mouseout: (e: any) => { e.target.setStyle(styleFeature(feature)); },
+        });
+    };
+
+    // Filtered data by selected kabupaten
+    const filteredMapData = useMemo(() => {
+        if (!selectedKabupaten) return mapData;
+        return Object.fromEntries(
+            Object.entries(mapData).filter(([, v]) => v.city_name === selectedKabupaten)
+        );
+    }, [mapData, selectedKabupaten]);
+
+    // Village markers with centroids
+    const villageMarkers = useMemo(() => {
+        if (!geoData) return [];
+        const markers: { pos: [number, number]; data: VillageData }[] = [];
+        geoData.features.forEach((f: any) => {
+            const vd = getVillageData(f.properties);
+            if (!vd) return;
+            if (selectedKabupaten && f.properties?.WADMKK !== selectedKabupaten) return;
+            const centroid = getPolygonCentroid(f);
+            if (centroid) markers.push({ pos: centroid, data: vd });
+        });
+        return markers;
+    }, [geoData, mapData, selectedKabupaten]);
+
+    // Aggregate component scores across filtered villages
+    const componentAggregates = useMemo(() => {
+        const agg: Record<string, { label: string; totalScore: number; count: number }> = {};
+        Object.values(filteredMapData).forEach(v => {
+            if (!v.component_scores) return;
+            Object.entries(v.component_scores).forEach(([key, comp]) => {
+                if (!agg[key]) agg[key] = { label: comp.label, totalScore: 0, count: 0 };
+                agg[key].totalScore += comp.score;
+                agg[key].count += 1;
+            });
+        });
+        return agg;
+    }, [filteredMapData]);
+
+    // Split components into two groups for the two bar charts
+    const facilityKeys = ['air_minum', 'air_limbah', 'persampahan', 'drainase'];
+    const behaviorKeys = ['phbs'];
+
+    const makeBarData = (keys: string[]) => {
+        const labels: string[] = [];
+        const values: number[] = [];
+        const colors = ['#26a269', '#1c71d8', '#e5a50a', '#c64600', '#613583', '#e01b24'];
+        keys.forEach(k => {
+            const comp = componentAggregates[k];
+            if (comp) {
+                labels.push(comp.label);
+                values.push(comp.count > 0 ? Math.round(comp.totalScore / comp.count * 100) / 100 : 0);
+            }
+        });
+        // If no facility/behavior keys match, show all available
+        if (labels.length === 0) {
+            Object.entries(componentAggregates).forEach(([, comp]) => {
+                labels.push(comp.label);
+                values.push(comp.count > 0 ? Math.round(comp.totalScore / comp.count * 100) / 100 : 0);
+            });
+        }
         return {
-            fillColor: villageData ? villageData.color : '#e5e7eb',
-            weight: 1,
-            opacity: 1,
-            color: 'white',
-            dashArray: '3',
-            fillOpacity: 0.6
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: colors.slice(0, labels.length),
+                borderRadius: 4,
+                barThickness: 28,
+            }],
         };
     };
 
-    const getRiskLabelText = (riskStr: string) => {
-        if (!riskStr) return 'Belum Dianalisis';
-        return riskStr.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    // Pie chart data - risk distribution
+    const pieData = useMemo(() => {
+        const counts: Record<string, { count: number; color: string }> = {};
+        Object.values(filteredMapData).forEach(v => {
+            if (!counts[v.risk]) counts[v.risk] = { count: 0, color: v.color };
+            counts[v.risk].count += 1;
+        });
+        return {
+            labels: Object.keys(counts),
+            datasets: [{
+                data: Object.values(counts).map(c => c.count),
+                backgroundColor: Object.values(counts).map(c => c.color),
+                borderWidth: 2,
+                borderColor: '#fff',
+            }],
+        };
+    }, [filteredMapData]);
+
+    const barOptions = (title: string) => ({
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            title: { display: true, text: title, font: { size: 12, weight: 'bold' as const }, color: '#1e293b' },
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+            x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 45 } },
+        },
+    });
+
+    const pieOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'right' as const, labels: { font: { size: 10 }, padding: 8, usePointStyle: true } },
+            title: { display: true, text: 'DETAIL DISTRIBUSI RISIKO', font: { size: 12, weight: 'bold' as const }, color: '#1e293b' },
+        },
     };
 
-    const onEachFeature = (feature: any, layer: any) => {
-        const { WADMKC, WADMKD } = feature.properties;
-        const villageData = mapData[WADMKD];
-        const riskLabel = villageData ? getRiskLabelText(villageData.risk) : 'Belum Dianalisis';
-        const riskColor = villageData ? villageData.color : '#cbd5e1'; // slate-300 for unanalyzed
-        const respondentsInfo = villageData
-            ? `<p class="text-xs text-gray-500 m-0 mb-2">Responden: ${villageData.total_respondents} (Skor: ${villageData.irs_total})</p>`
-            : `<p class="text-xs text-gray-400 m-0 mb-2 italic">Belum ada data survei</p>`;
+    // Table data sorted by IRS
+    const tableData = useMemo(() => {
+        return Object.entries(filteredMapData)
+            .sort((a, b) => (b[1].irs_total || 0) - (a[1].irs_total || 0));
+    }, [filteredMapData]);
 
-        const tooltipContent = `
-            <div class="font-sans min-w-[150px] p-1">
-                <h4 class="font-bold text-gray-900 m-0 mb-1">${WADMKD || 'Unknown'}</h4>
-                <p class="text-xs text-gray-500 m-0 mb-1">Kec. ${WADMKC || 'Unknown'}</p>
-                ${respondentsInfo}
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${riskColor}"></span>
-                    <span class="text-sm font-medium text-gray-700">${riskLabel}</span>
-                </div>
-            </div>
-        `;
-
-        layer.bindPopup(tooltipContent, {
-            // sticky: true,
-            className: 'bg-white/95 backdrop-blur-sm border-0 shadow-lg rounded-xl p-2'
-        });
-
-        layer.on({
-            mouseover: (e: any) => {
-                const target = e.target;
-                target.setStyle({
-                    weight: 2,
-                    color: '#1e293b',
-                    dashArray: '',
-                    fillOpacity: 0.8
-                });
-                target.bringToFront();
-            },
-            mouseout: (e: any) => {
-                const target = e.target;
-                // To safely reset style, we should use the layer's original style or the GeoJSON resetStyle function.
-                // However, directly calling the style function again is easier:
-                target.setStyle(styleFeature(feature));
-            }
-        });
-    };
+    const riskBadgeStyle = (color: string) => ({
+        backgroundColor: color, color: '#fff', padding: '2px 10px',
+        borderRadius: '4px', fontSize: '11px', fontWeight: 700, display: 'inline-block',
+        textTransform: 'uppercase' as const, letterSpacing: '0.5px',
+    });
 
     return (
         <>
-            <Head title="Welcome" />
-            <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 font-sans antialiased text-gray-900">
+            <Head title="Dashboard EHRA" />
+            <div style={{ minHeight: '100vh', backgroundColor: '#f0f4f3', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
                 {/* Navbar */}
-                <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 dark:bg-zinc-900/80 dark:border-zinc-800 sticky top-0 z-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between h-16 items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
-                                    <Activity className="w-5 h-5 text-white" />
-                                </div>
-                                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
-                                    EHRA App
-                                </span>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                {auth.user ? (
-                                    <Link
-                                        href={route('dashboard')}
-                                        className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-zinc-800"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                ) : (
-                                    <>
-                                        <Link
-                                            href={route('login')}
-                                            className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-zinc-800"
-                                        >
-                                            Log in
-                                        </Link>
-                                        <Link
-                                            href={route('register')}
-                                            className="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 rounded-lg shadow-sm transition-all hover:shadow focus:ring-2 focus:ring-gray-900 focus:ring-offset-1"
-                                        >
-                                            Register
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                <nav style={{
+                    background: 'linear-gradient(135deg, #1a5c3a 0%, #217a4b 50%, #2d8a56 100%)',
+                    padding: '0 20px', height: '48px', display: 'flex', alignItems: 'center',
+                    justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Activity size={22} color="#fff" />
+                        <span style={{ color: '#fff', fontSize: '16px', fontWeight: 700, letterSpacing: '-0.3px' }}>
+                            EHRA <span style={{ fontWeight: 400, opacity: 0.8 }}>Dashboard Publik</span>
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {auth.user ? (
+                            <Link href={route('dashboard')} style={{
+                                color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                                padding: '6px 16px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.15)',
+                            }}>Dashboard</Link>
+                        ) : (
+                            <>
+                                <Link href={route('login')} style={{
+                                    color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                                    padding: '6px 16px', borderRadius: '6px',
+                                }}>Log in</Link>
+                                <Link href={route('register')} style={{
+                                    color: '#1a5c3a', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                                    padding: '6px 16px', borderRadius: '6px', backgroundColor: '#fff',
+                                }}>Register</Link>
+                            </>
+                        )}
                     </div>
                 </nav>
 
-                {/* Main Content (Dashboard Overview) */}
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <div className="mb-10 text-center md:text-left">
-                        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Dashboard Publik</h1>
-                        <p className="mt-2 text-base text-gray-500 dark:text-gray-400 max-w-2xl">
-                            Ringkasan dan progres pelaksanaan survei EHRA (Environmental Health Risk Assessment) yang dapat diakses oleh masyarakat umum.
-                        </p>
+                {/* Main Content */}
+                <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 320px', gap: '0', height: 'calc(100vh - 48px - 240px)' }}>
+                    {/* Left Sidebar */}
+                    <div style={{
+                        backgroundColor: '#fff', borderRight: '1px solid #e2e8e0', padding: '16px',
+                        overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px',
+                    }}>
+                        <div>
+                            <label style={{ fontSize: '11px', fontWeight: 700, color: '#1a5c3a', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                Pilih Kabupaten / Kota Sultra
+                            </label>
+                            <select
+                                value={selectedKabupaten}
+                                onChange={e => setSelectedKabupaten(e.target.value)}
+                                style={{
+                                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px',
+                                    fontSize: '13px', fontWeight: 500, backgroundColor: '#fff', cursor: 'pointer',
+                                }}
+                            >
+                                <option value="">Seluruh Wilayah</option>
+                                {cityList.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
+                        <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '14px' }}>
+                            <h4 style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px' }}>
+                                Legenda Risiko Sanitasi (IRS)
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {riskCategories.map((cat, i) => (
+                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{
+                                            width: '14px', height: '14px', borderRadius: '50%',
+                                            backgroundColor: cat.color, border: '2px solid rgba(0,0,0,0.1)',
+                                            flexShrink: 0,
+                                        }} />
+                                        <span style={{ fontSize: '12px', color: '#374151', fontWeight: 500 }}>{cat.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Summary Stats */}
+                        <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '14px' }}>
+                            <h4 style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px' }}>
+                                Ringkasan Data
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                    <span style={{ color: '#6b7280' }}>Total Desa Tersurvei</span>
+                                    <span style={{ fontWeight: 700, color: '#1a5c3a' }}>{Object.keys(filteredMapData).length}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                    <span style={{ color: '#6b7280' }}>Total Responden</span>
+                                    <span style={{ fontWeight: 700, color: '#1a5c3a' }}>
+                                        {Object.values(filteredMapData).reduce((s, v) => s + (v.total_respondents || 0), 0)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="space-y-8">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                            {/* Stat 1 */}
-                            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-5 relative overflow-hidden group hover:shadow-md transition-shadow">
-                                <div className="absolute -right-6 -top-6 w-32 h-32 bg-blue-50 dark:bg-blue-900/10 rounded-full group-hover:scale-110 transition-transform duration-500 ease-out"></div>
-                                <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 relative z-10">
-                                    <FileText size={26} strokeWidth={2} />
-                                </div>
-                                <div className="relative z-10">
-                                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Total Survei</p>
-                                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">1,248</h3>
-                                </div>
-                            </div>
+                    {/* Map Center */}
+                    <div style={{ position: 'relative' }}>
+                        <MapContainer center={[-4.14491, 122.174605]} zoom={7} scrollWheelZoom={true}
+                            style={{ height: '100%', width: '100%', backgroundColor: '#e8f0ec' }}>
+                            <TileLayer
+                                attribution='&copy; <a href="https://carto.com">CARTO</a>'
+                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                            />
+                            {geoData && (
+                                <GeoJSON data={geoData} style={styleFeature} onEachFeature={onEachFeature} />
+                            )}
+                            {villageMarkers.map((m, i) => (
+                                <CircleMarker key={i} center={m.pos} radius={8}
+                                    pathOptions={{
+                                        fillColor: m.data.color, fillOpacity: 0.9,
+                                        color: '#fff', weight: 2,
+                                    }}
+                                />
+                            ))}
+                            <MapController geoData={geoData} selectedKabupaten={selectedKabupaten} />
+                        </MapContainer>
+                    </div>
 
-                            {/* Stat 2 */}
-                            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-5 relative overflow-hidden group hover:shadow-md transition-shadow">
-                                <div className="absolute -right-6 -top-6 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/10 rounded-full group-hover:scale-110 transition-transform duration-500 ease-out"></div>
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 relative z-10">
-                                    <MapPin size={26} strokeWidth={2} />
-                                </div>
-                                <div className="relative z-10">
-                                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Desa Tersurvei</p>
-                                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">86 <span className="text-base font-medium text-gray-400">/ 124</span></h3>
-                                </div>
-                            </div>
-
-                            {/* Stat 3 */}
-                            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800 flex items-center gap-5 relative overflow-hidden group hover:shadow-md transition-shadow">
-                                <div className="absolute -right-6 -top-6 w-32 h-32 bg-rose-50 dark:bg-rose-900/10 rounded-full group-hover:scale-110 transition-transform duration-500 ease-out"></div>
-                                <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 relative z-10">
-                                    <AlertTriangle size={26} strokeWidth={2} />
-                                </div>
-                                <div className="relative z-10">
-                                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Risiko Tinggi</p>
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">12</h3>
-                                        <span className="text-sm font-bold text-rose-600 bg-rose-100 dark:bg-rose-900/40 dark:text-rose-300 px-2.5 py-0.5 rounded-full">14%</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Stat 4 */}
-                            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-md border border-transparent text-white flex items-center gap-5 relative overflow-hidden group hover:shadow-lg transition-shadow">
-                                <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-500 ease-out"></div>
-                                <div className="w-14 h-14 rounded-2xl bg-white/20 text-white flex items-center justify-center shrink-0 relative z-10 backdrop-blur-sm border border-white/10">
-                                    <Activity size={26} strokeWidth={2} />
-                                </div>
-                                <div className="relative z-10">
-                                    <p className="text-sm font-semibold text-indigo-100 mb-1">Indeks Risiko Rata-rata</p>
-                                    <h3 className="text-3xl font-bold text-white tracking-tight">Sedang</h3>
-                                </div>
-                            </div>
+                    {/* Right Panel - Table */}
+                    <div style={{
+                        backgroundColor: '#fff', borderLeft: '1px solid #e2e8e0',
+                        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                    }}>
+                        <div style={{ padding: '14px 16px', borderBottom: '1px solid #e5e7eb' }}>
+                            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#1a5c3a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                                Matriks Desa/Kelurahan Skala Mikro
+                            </h3>
+                            <p style={{ fontSize: '10px', color: '#6b7280', margin: '4px 0 0' }}>
+                                Klik baris tabel untuk melihat detail
+                            </p>
                         </div>
-
-                        {/* Map Section */}
-                        <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Peta Persebaran Risiko Lingkungan</h3>
-                                <select
-                                    className="bg-gray-50 dark:bg-zinc-800 border-none text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 py-2 px-4 cursor-pointer"
-                                    value={selectedKabupaten}
-                                    onChange={(e) => setSelectedKabupaten(e.target.value)}
-                                >
-                                    <option value="">Semua Kabupaten / Kota</option>
-                                    {kabupatenList.map(kab => (
-                                        <option key={kab} value={kab}>{kab}</option>
+                        <div style={{ overflowY: 'auto', flex: 1 }}>
+                            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ backgroundColor: '#f8faf9', borderBottom: '2px solid #e5e7eb' }}>
+                                        <th style={{ padding: '8px 10px', textAlign: 'left', fontSize: '10px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>Kode</th>
+                                        <th style={{ padding: '8px 10px', textAlign: 'left', fontSize: '10px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>Nama Desa / Kelurahan</th>
+                                        <th style={{ padding: '8px 10px', textAlign: 'center', fontSize: '10px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>Status IRS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {tableData.map(([key, data], idx) => (
+                                        <tr key={idx}
+                                            onClick={() => setSelectedRow(key)}
+                                            style={{
+                                                cursor: 'pointer', borderBottom: '1px solid #f1f5f9',
+                                                backgroundColor: selectedRow === key ? '#f0fdf4' : (idx % 2 === 0 ? '#fff' : '#fafbfa'),
+                                                transition: 'background-color 0.15s',
+                                            }}
+                                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0fdf4')}
+                                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = selectedRow === key ? '#f0fdf4' : (idx % 2 === 0 ? '#fff' : '#fafbfa'))}
+                                        >
+                                            <td style={{ padding: '8px 10px', fontFamily: 'monospace', fontSize: '11px', color: '#6b7280' }}>
+                                                {data.kemendagri_code || '-'}
+                                            </td>
+                                            <td style={{ padding: '8px 10px' }}>
+                                                <div style={{ fontWeight: 600, color: '#1e293b' }}>{data.village_name}</div>
+                                                <div style={{ fontSize: '10px', color: '#9ca3af' }}>Kec. {data.district_name}</div>
+                                            </td>
+                                            <td style={{ padding: '8px 10px', textAlign: 'center' }}>
+                                                <span style={riskBadgeStyle(data.color)}>{data.risk}</span>
+                                            </td>
+                                        </tr>
                                     ))}
-                                </select>
-                            </div>
-                            <div className="h-[400px] w-full rounded-xl overflow-hidden border border-gray-100 dark:border-zinc-800 relative z-0">
-                                <MapContainer center={[-4.14491, 122.174605]} zoom={7} scrollWheelZoom={false} className="h-full w-full bg-[#f8fafc] dark:bg-[#09090b]">
-                                    <TileLayer
-                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                    />
-                                    {geoData && (
-                                        <GeoJSON
-                                            data={geoData}
-                                            style={styleFeature}
-                                            onEachFeature={onEachFeature}
-                                        />
-                                    )}
-                                    <MapController geoData={geoData} selectedKabupaten={selectedKabupaten} />
-                                </MapContainer>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Main Chart Area */}
-                            <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800 lg:col-span-2">
-                                <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Progress Survei EHRA</h3>
-                                    <select className="bg-gray-50 dark:bg-zinc-800 border-none text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 py-2 px-4 cursor-pointer">
-                                        <option>Bulan Ini</option>
-                                        <option>Bulan Lalu</option>
-                                        <option>Tahun Ini</option>
-                                    </select>
-                                </div>
-                                <div className="h-[280px] w-full flex items-end gap-3 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {[40, 60, 45, 80, 50, 90, 70, 65, 85, 100].map((h, i) => (
-                                        <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
-                                            <div className="w-full relative rounded-t-md overflow-hidden bg-gray-100 dark:bg-zinc-800 flex items-end h-[240px]">
-                                                <div
-                                                    className="w-full bg-blue-500 group-hover:bg-blue-600 dark:bg-blue-600 dark:group-hover:bg-blue-500 transition-colors rounded-t-md relative"
-                                                    style={{ height: `${h}%` }}
-                                                >
-                                                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-2 py-1 rounded text-xs transition-opacity whitespace-nowrap pointer-events-none">
-                                                        {h}%
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <span>T{i + 1}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Right Column */}
-                            <div className="space-y-8">
-                                <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Distribusi Risiko</h3>
-                                    <div className="space-y-5">
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600 dark:text-gray-400 font-medium">Sangat Tinggi</span>
-                                                <span className="text-gray-900 dark:text-gray-100 font-bold">5%</span>
-                                            </div>
-                                            <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2.5">
-                                                <div className="bg-rose-500 h-2.5 rounded-full" style={{ width: '5%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600 dark:text-gray-400 font-medium">Tinggi</span>
-                                                <span className="text-gray-900 dark:text-gray-100 font-bold">14%</span>
-                                            </div>
-                                            <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2.5">
-                                                <div className="bg-orange-500 h-2.5 rounded-full" style={{ width: '14%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600 dark:text-gray-400 font-medium">Sedang</span>
-                                                <span className="text-gray-900 dark:text-gray-100 font-bold">45%</span>
-                                            </div>
-                                            <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2.5">
-                                                <div className="bg-amber-400 h-2.5 rounded-full" style={{ width: '45%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600 dark:text-gray-400 font-medium">Kurang Berisiko</span>
-                                                <span className="text-gray-900 dark:text-gray-100 font-bold">26%</span>
-                                            </div>
-                                            <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2.5">
-                                                <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: '26%' }}></div>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="flex justify-between text-sm mb-2">
-                                                <span className="text-gray-600 dark:text-gray-400 font-medium">Tidak Berisiko</span>
-                                                <span className="text-gray-900 dark:text-gray-100 font-bold">10%</span>
-                                            </div>
-                                            <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2.5">
-                                                <div className="bg-emerald-500 h-2.5 rounded-full" style={{ width: '10%' }}></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Aktivitas Terbaru</h3>
-                                    <div className="space-y-5">
-                                        <div className="flex gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                                                <CheckCircle2 size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Desa Suka Maju selesai</p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Kuota 40/40 terpenuhi • 2 jam lalu</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-                                                <Users size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Enumerator Budi login</p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Mulai survei Kec. Kota • 3 jam lalu</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                                                <TrendingUp size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Laporan mingguan di-generate</p>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Sistem otomatis • Kemarin</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Table Placeholder */}
-                        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden mb-10">
-                            <div className="p-6 border-b border-gray-100 dark:border-zinc-800 flex items-center justify-between bg-gray-50/50 dark:bg-zinc-900/50">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Status Survei per Desa</h3>
-                                <button className="text-sm text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-800 dark:hover:text-blue-300 transition-colors bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40">Lihat Semua Data</button>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-white dark:bg-zinc-900 text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider text-xs border-b border-gray-100 dark:border-zinc-800">
+                                    {tableData.length === 0 && (
                                         <tr>
-                                            <th className="px-6 py-4">Kelurahan/Desa</th>
-                                            <th className="px-6 py-4">Kecamatan</th>
-                                            <th className="px-6 py-4">Progress Survei</th>
-                                            <th className="px-6 py-4">Status Risiko Lingkungan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-zinc-800">
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors group">
-                                            <td className="px-6 py-5 font-semibold text-gray-900 dark:text-white">Mekar Jaya</td>
-                                            <td className="px-6 py-5 text-gray-600 dark:text-gray-400 font-medium">Suka Karya</td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2 max-w-[120px]">
-                                                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                                                    </div>
-                                                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">40/40 (100%)</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <span className="inline-flex items-center px-2.5 py-1 bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 rounded-md text-xs font-bold border border-rose-200 dark:border-rose-800/50 shadow-sm">Tinggi</span>
+                                            <td colSpan={3} style={{ padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: '12px' }}>
+                                                Belum ada data survei
                                             </td>
                                         </tr>
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors group">
-                                            <td className="px-6 py-5 font-semibold text-gray-900 dark:text-white">Suka Maju</td>
-                                            <td className="px-6 py-5 text-gray-600 dark:text-gray-400 font-medium">Suka Karya</td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2 max-w-[120px]">
-                                                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '60%' }}></div>
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">24/40 (60%)</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <span className="inline-flex items-center px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-md text-xs font-bold border border-amber-200 dark:border-amber-800/50 shadow-sm">Sedang</span>
-                                            </td>
-                                        </tr>
-                                        <tr className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors group">
-                                            <td className="px-6 py-5 font-semibold text-gray-900 dark:text-white">Tirta Jaya</td>
-                                            <td className="px-6 py-5 text-gray-600 dark:text-gray-400 font-medium">Suka Karya</td>
-                                            <td className="px-6 py-5">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2 max-w-[120px]">
-                                                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '10%' }}></div>
-                                                    </div>
-                                                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">4/40 (10%)</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <span className="inline-flex items-center px-2.5 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 rounded-md text-xs font-bold border border-gray-200 dark:border-zinc-700 shadow-sm">Belum Dianalisis</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </main>
+                </div>
 
-                {/* Footer */}
-                <footer className="bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-zinc-800 py-8">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                            &copy; {new Date().getFullYear()} EHRA App. All rights reserved.
-                        </div>
-                        <div className="text-sm text-gray-400 dark:text-gray-500">
-                            Laravel v{laravelVersion} (PHP v{phpVersion})
+                {/* Bottom Charts Row */}
+                <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px',
+                    padding: '12px 12px 16px', backgroundColor: '#f0f4f3',
+                }}>
+                    {/* Chart 1 - Facility Sanitation */}
+                    <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '14px', border: '1px solid #e2e8e0', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ height: '200px' }}>
+                            <Bar data={makeBarData(facilityKeys)} options={barOptions('KOMPONEN 1: KETERSEDIAAN FASILITAS SANITASI (%)')} />
                         </div>
                     </div>
-                </footer>
+
+                    {/* Chart 2 - Hygiene Behavior */}
+                    <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '14px', border: '1px solid #e2e8e0', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ height: '200px' }}>
+                            <Bar data={makeBarData(behaviorKeys)} options={barOptions('KOMPONEN 2: PERILAKU HIGIENE & STBM (%)')} />
+                        </div>
+                    </div>
+
+                    {/* Chart 3 - Pie Chart */}
+                    <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '14px', border: '1px solid #e2e8e0', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ height: '200px' }}>
+                            <Pie data={pieData} options={pieOptions} />
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     );

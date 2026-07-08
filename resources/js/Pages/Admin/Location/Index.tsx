@@ -82,7 +82,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <MapPin className="text-blue-600" />
+                            <MapPin className="text-emerald-700" />
                             Manajemen Lokasi
                         </h2>
                         
@@ -90,7 +90,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                         <div className="flex items-center flex-wrap gap-1 mt-2 text-sm">
                             <Link 
                                 href={route('admin.locations.index', { level: 'province' })}
-                                className={`${level === 'province' ? 'font-bold text-gray-800' : 'text-blue-600 hover:text-blue-800'} transition-colors`}
+                                className={`${level === 'province' ? 'font-bold text-gray-800' : 'text-emerald-700 hover:text-emerald-800'} transition-colors`}
                             >
                                 Semua Provinsi
                             </Link>
@@ -103,7 +103,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                         <ChevronRight size={14} className="text-gray-400" />
                                         <Link 
                                             href={route('admin.locations.index', { level: b.level, parent_id: b.parent_id })}
-                                            className={`${isLast ? 'font-bold text-gray-800' : 'text-blue-600 hover:text-blue-800'} transition-colors max-w-[150px] truncate`}
+                                            className={`${isLast ? 'font-bold text-gray-800' : 'text-emerald-700 hover:text-emerald-800'} transition-colors max-w-[150px] truncate`}
                                             title={b.name}
                                         >
                                             {b.name}
@@ -116,7 +116,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                     
                     <button
                         onClick={() => openModal()}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-sm"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-sm"
                     >
                         <Plus size={18} /> Tambah Data
                     </button>
@@ -151,7 +151,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                         {nextLevel ? (
                                             <Link 
                                                 href={route('admin.locations.index', { level: nextLevel, parent_id: loc.id })}
-                                                className="font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2"
+                                                className="font-bold text-emerald-700 hover:text-emerald-800 transition-colors flex items-center gap-2"
                                             >
                                                 {loc.name} <ChevronRight size={14} className="opacity-50" />
                                             </Link>
@@ -167,7 +167,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                                     {loc.type}
                                                 </span>
                                                 {loc.geojson_path && (
-                                                    <a href={`/storage/${loc.geojson_path}`} target="_blank" className="text-blue-500 hover:text-blue-700 text-xs inline-flex items-center gap-1">
+                                                    <a href={`/storage/${loc.geojson_path}`} target="_blank" className="text-emerald-600 hover:text-emerald-800 text-xs inline-flex items-center gap-1">
                                                         <FileJson size={12} /> Ada File GeoJSON
                                                     </a>
                                                 )}
@@ -196,7 +196,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                         <div className="flex items-center justify-end gap-3">
                                             <button
                                                 onClick={() => openModal(loc)}
-                                                className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center gap-1"
+                                                className="text-emerald-700 hover:text-emerald-800 font-medium inline-flex items-center gap-1"
                                             >
                                                 <Edit3 size={16} /> Edit
                                             </button>
@@ -241,7 +241,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                     type="text"
                                     value={data.name}
                                     onChange={(e) => setData('name', e.target.value)}
-                                    className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                    className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                     required
                                 />
                                 {errors.name && <p className="text-rose-500 text-xs mt-1">{errors.name}</p>}
@@ -256,7 +256,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             min="0"
                                             value={data.kemendagri_code}
                                             onChange={(e) => setData('kemendagri_code', e.target.value)}
-                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                            className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                         />
                                     </div>
                                 </>
@@ -271,7 +271,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             min="0"
                                             value={data.kemendagri_code}
                                             onChange={(e) => setData('kemendagri_code', e.target.value)}
-                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                            className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                         />
                                     </div>
                                 </>
@@ -285,7 +285,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             min="0"
                                             value={data.kemendagri_code}
                                             onChange={(e) => setData('kemendagri_code', e.target.value)}
-                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                            className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                         />
                                     </div>
                                     <div>
@@ -293,7 +293,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                         <select
                                             value={data.type}
                                             onChange={(e) => setData('type', e.target.value)}
-                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                            className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                         >
                                             <option value="kabupaten">Kabupaten</option>
                                             <option value="kota">Kota</option>
@@ -305,7 +305,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             type="file"
                                             accept=".json,.geojson"
                                             onChange={(e) => setData('geojson', e.target.files ? e.target.files[0] : null)}
-                                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-800 hover:file:bg-emerald-100"
                                         />
                                         <p className="text-xs text-gray-500 mt-1">Format didukung: .json, .geojson. Kosongkan jika tidak ingin mengubah.</p>
                                         {errors.geojson && <p className="text-rose-500 text-xs mt-1">{errors.geojson}</p>}
@@ -322,7 +322,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             min="0"
                                             value={data.kemendagri_code}
                                             onChange={(e) => setData('kemendagri_code', e.target.value)}
-                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                            className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -331,7 +331,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                             <select
                                                 value={data.status}
                                                 onChange={(e) => setData('status', e.target.value)}
-                                                className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                                className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                             >
                                                 <option value="pedesaan">Pedesaan</option>
                                                 <option value="perkotaan">Perkotaan</option>
@@ -345,7 +345,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                                 max="5"
                                                 value={data.strata}
                                                 onChange={(e) => setData('strata', e.target.value)}
-                                                className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                                className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                             />
                                         </div>
                                     </div>
@@ -358,7 +358,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                                 value={data.centroid_lat}
                                                 onChange={(e) => setData('centroid_lat', e.target.value)}
                                                 placeholder="-4.0123"
-                                                className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                                className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                             />
                                         </div>
                                         <div>
@@ -369,7 +369,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                                 value={data.centroid_lng}
                                                 onChange={(e) => setData('centroid_lng', e.target.value)}
                                                 placeholder="122.512"
-                                                className="w-full rounded-lg border-gray-300 focus:border-blue-500"
+                                                className="w-full rounded-lg border-gray-300 focus:border-emerald-500"
                                             />
                                         </div>
                                     </div>
@@ -387,7 +387,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-5 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 transition-colors shadow-sm"
+                                    className="px-5 py-2 text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg disabled:opacity-50 transition-colors shadow-sm"
                                 >
                                     {processing ? 'Menyimpan...' : 'Simpan Data'}
                                 </button>

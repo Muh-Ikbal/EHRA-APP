@@ -1,0 +1,66 @@
+{
+    "MUNA_TONGKUNO_TANJUNG": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.00",
+        "total_respondents": 2,
+        "village_name": "Tanjung",
+        "district_name": "Tongkuno"
+    },
+    "BUTON_LASALIMU SELATAN_SIONTAPINA": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.00",
+        "total_respondents": 1,
+        "village_name": "Siontapina",
+        "district_name": "Lasalimu Selatan"
+    },
+    "KOTA BAU BAU_BETOAMBARI_WABOROBO": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.00",
+        "total_respondents": 1,
+        "village_name": "Waborobo",
+        "district_name": "Betoambari"
+    },
+    "KOTA KENDARI_NAMBO_TOBIMEITA": {
+        "risk": "Berisiko Sedang",
+        "color": "#1c71d8",
+        "irs_total": "185.00",
+        "total_respondents": 2,
+        "village_name": "Tobimeita",
+        "district_name": "Nambo"
+    },
+    "KONAWE UTARA_WIWIRANO_WACUMELEWE": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "2.00",
+        "total_respondents": 1,
+        "village_name": "Wacumelewe",
+        "district_name": "Wiwirano"
+    },
+    "KONAWE_KONAWE_BUNGGUOSU": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.00",
+        "total_respondents": 1,
+        "village_name": "Bungguosu",
+        "district_name": "Konawe"
+    },
+    "KONAWE_ABUKI_ANGGORO": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.00",
+        "total_respondents": 2,
+        "village_name": "Anggoro",
+        "district_name": "Abuki"
+    },
+    "KONAWE_PADANGGUNI_PADANGGUNI": {
+        "risk": "Kurang Berisiko",
+        "color": "#2ec27e",
+        "irs_total": "0.50",
+        "total_respondents": 4,
+        "village_name": "Padangguni",
+        "district_name": "Padangguni"
+    }
+}

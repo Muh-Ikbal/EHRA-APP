@@ -4,7 +4,8 @@ EHRA-APP adalah sistem informasi berbasis web yang dirancang khusus untuk memfas
 
 ## ✨ Fitur Utama
 
-- **Builder Kuesioner Dinamis (Form Builder)**
+- **Builder Kuesioner Dinamis (Form Bu
+ilder)**
   Admin dapat membuat dan merancang kuesioner EHRA secara fleksibel. Mendukung berbagai tipe pertanyaan (pilihan ganda, teks, angka) serta pengaturan logika lompat (*skip logic*).
   
 - **Manajemen Bobot IRS (Indeks Risiko Sanitasi)**

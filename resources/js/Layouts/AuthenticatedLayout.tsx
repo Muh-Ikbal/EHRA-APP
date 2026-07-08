@@ -1,7 +1,7 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutDashboard, Users, FileText, Settings, Menu, Bell, Map, PieChart, MapPin, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Menu, Bell, Map, PieChart, MapPin, ShieldAlert, LogOut, UserCircle, ChevronLeft } from 'lucide-react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
 export default function Authenticated({
@@ -18,29 +18,27 @@ export default function Authenticated({
         { name: 'Manajemen Kuesioner', href: route('admin.questionnaires.index'), icon: FileText, active: route().current('admin.questionnaires.*') },
         { name: 'Hasil Survei', href: route('admin.survey-results.index'), icon: FileText, active: route().current('admin.survey-results.*') },
         { name: 'Kategori Risiko', href: route('admin.risk-categories.index'), icon: ShieldAlert, active: route().current('admin.risk-categories.*') },
-        { name: 'Peta Risiko', href: '#', icon: Map, active: false },
-        { name: 'Laporan EHRA', href: '#', icon: PieChart, active: false },
         { name: 'Enumerator', href: route('admin.enumerators.index'), icon: Users, active: route().current('admin.enumerators.*') },
-        { name: 'Pengaturan', href: '#', icon: Settings, active: false },
     ];
 
     return (
-        <div className="flex h-screen bg-[#f4f7fb] font-sans">
+        <div className="flex h-screen font-sans" style={{ backgroundColor: '#f0f4f3' }}>
             {/* Sidebar */}
             <aside
-                className={`${
-                    sidebarOpen ? 'w-64' : 'w-20'
-                } flex-shrink-0 bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col`}
+                className={`${sidebarOpen ? 'w-64' : 'w-20'} flex-shrink-0 transition-all duration-300 ease-in-out flex flex-col relative`}
+                style={{
+                    background: 'linear-gradient(180deg, #1a5c3a 0%, #14532d 100%)',
+                }}
             >
                 {/* Logo Area */}
-                <div className="h-16 flex items-center justify-center border-b border-gray-100 px-4">
-                    <Link href="/" className="flex items-center gap-3">
-                        <div className="bg-blue-600 text-white p-1.5 rounded-lg">
-                            <Map size={24} strokeWidth={2.5} />
+                <div className="h-16 flex items-center px-4 border-b border-white/10">
+                    <Link href="/" className="flex items-center gap-3 w-full">
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                            <Map size={20} className="text-white" strokeWidth={2.5} />
                         </div>
                         {sidebarOpen && (
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                EHRA
+                            <span className="text-lg font-bold text-white tracking-tight">
+                                EHRA <span className="font-normal text-white/60 text-sm">App</span>
                             </span>
                         )}
                     </Link>
@@ -48,35 +46,60 @@ export default function Authenticated({
 
                 {/* Nav Links */}
                 <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                    {sidebarOpen && (
+                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest px-3 mb-3">Menu Utama</p>
+                    )}
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                                    item.active
-                                        ? 'bg-blue-50 text-blue-600 font-semibold shadow-sm'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${item.active
+                                    ? 'bg-white/15 text-white font-semibold shadow-sm backdrop-blur-sm'
+                                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                                    }`}
                                 title={!sidebarOpen ? item.name : undefined}
                             >
-                                <Icon size={20} className={item.active ? 'text-blue-600' : 'text-gray-400'} />
+                                <Icon size={20} className={item.active ? 'text-emerald-300' : 'text-white/50 group-hover:text-white/80'} />
                                 {sidebarOpen && <span className="text-sm">{item.name}</span>}
                             </Link>
                         );
                     })}
                 </div>
+
+                {/* Sidebar Footer - User Info (collapsed view) */}
+                {sidebarOpen && (
+                    <div className="px-3 pb-4 border-t border-white/10 pt-3">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/10">
+                            <div className="w-8 h-8 rounded-full bg-emerald-400/30 text-emerald-200 flex items-center justify-center font-bold text-sm">
+                                {user.name.charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                                <p className="text-[10px] text-white/50">Administrator</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Collapse Toggle */}
+                <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="absolute -right-3 top-20 w-6 h-6 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors z-20"
+                >
+                    <ChevronLeft size={14} className={`transition-transform duration-300 ${!sidebarOpen ? 'rotate-180' : ''}`} />
+                </button>
             </aside>
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Top Header */}
-                <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
+                <header className="h-14 bg-white border-b border-gray-200/60 flex items-center justify-between px-4 lg:px-6 z-10 shrink-0 shadow-sm">
                     <div className="flex items-center gap-4 flex-1">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors shrink-0"
+                            className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors shrink-0 lg:hidden"
                         >
                             <Menu size={20} />
                         </button>
@@ -87,25 +110,25 @@ export default function Authenticated({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         {/* Notifications */}
-                        <button className="relative p-2 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">
-                            <Bell size={20} />
+                        <button className="relative p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors">
+                            <Bell size={18} />
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
                         </button>
 
                         {/* User Dropdown */}
                         <Dropdown>
                             <Dropdown.Trigger>
-                                <button className="flex items-center gap-3 p-1.5 rounded-full hover:bg-gray-50 transition-colors border border-transparent focus:border-gray-100">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                <button className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                    <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold text-sm shadow-sm" style={{ background: 'linear-gradient(135deg, #1a5c3a 0%, #22c55e 100%)' }}>
                                         {user.name.charAt(0)}
                                     </div>
                                     <div className="hidden md:block text-left">
                                         <div className="text-sm font-semibold text-gray-700 leading-tight">
                                             {user.name}
                                         </div>
-                                        <div className="text-xs text-gray-500">Admin</div>
+                                        <div className="text-[11px] text-gray-400">Admin</div>
                                     </div>
                                     <svg
                                         className="h-4 w-4 text-gray-400 hidden md:block"
@@ -139,7 +162,7 @@ export default function Authenticated({
                 </header>
 
                 {/* Page Content */}
-                <main className="flex-1 overflow-y-auto bg-[#f4f7fb] p-4 lg:p-8">
+                <main className="flex-1 overflow-y-auto p-4 lg:p-6" style={{ backgroundColor: '#f0f4f3' }}>
                     <div className="mx-auto max-w-7xl">
                         {children}
                     </div>

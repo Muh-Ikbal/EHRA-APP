@@ -102,7 +102,7 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
                                     <CheckCircle2 size={14} /> Approved
                                 </span>
                             ) : response.status === 'reviewed' ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-bold border border-blue-200">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-md text-xs font-bold border border-emerald-200">
                                     <CheckCircle2 size={14} /> Reviewed
                                 </span>
                             ) : response.status === 'submitted' ? (
@@ -122,7 +122,7 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
                                 <select
                                     value={response.status}
                                     onChange={handleStatusChange}
-                                    className="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 shadow-sm font-medium"
+                                    className="w-full rounded-lg border-gray-300 text-sm focus:ring-emerald-500 focus:border-emerald-500 shadow-sm font-medium"
                                 >
                                     <option value="draft">Draft</option>
                                     <option value="submitted">Submitted</option>
@@ -160,7 +160,7 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
                             <button
                                 onClick={handleRecalculate}
                                 disabled={isRecalculating}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
                                 title="Hitung ulang bobot desa secara manual"
                             >
                                 <RefreshCw size={14} className={isRecalculating ? 'animate-spin' : ''} />
@@ -212,7 +212,7 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
                         <h3 className="text-lg font-bold text-gray-900">Detail Jawaban Kuesioner</h3>
                         <Link
                             href={route('admin.survey-results.edit', response.id)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold hover:bg-emerald-800 transition-colors shadow-sm"
                         >
                             Edit Jawaban Survei
                         </Link>

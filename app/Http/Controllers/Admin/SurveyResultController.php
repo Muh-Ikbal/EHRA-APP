@@ -190,4 +190,35 @@ class SurveyResultController extends Controller
             return back()->withErrors(['error' => 'Gagal menghitung ulang: ' . $e->getMessage()]);
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $response = SurveyResponse::findOrFail($id);
+            $villageId = $response->village_id;
+            $versionId = $response->version_id;
+
+            // Delete answers first, then the response
+            \App\Models\Answer::where('response_id', $response->id)->delete();
+            $response->delete();
+
+            // Recalculate IRS for the village after deletion
+            $remaining = SurveyResponse::where('village_id', $villageId)
+                ->where('version_id', $versionId)
+                ->where('status', 'submitted')
+                ->count();
+
+            if ($remaining > 0) {
+                $calcService = new \App\Services\EhraCalculationService();
+                $calcService->calculateForVillage($villageId, $versionId);
+            }
+
+            return redirect()->route('admin.survey-results.index')->with('success', 'Data survei berhasil dihapus.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal hapus survei', [
+                'error' => $e->getMessage(),
+            ]);
+            return back()->withErrors(['error' => 'Gagal menghapus survei: ' . $e->getMessage()]);
+        }
+    }
 }

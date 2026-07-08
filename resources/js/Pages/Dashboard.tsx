@@ -14,12 +14,12 @@ export default function Dashboard() {
             <Head title="Dashboard" />
 
             <div className="space-y-6">
-                {/* Stats Grid - Compact & Bright */}
+                {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Stat 1 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
-                        <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 relative z-10">
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
+                        <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 relative z-10">
                             <FileText size={24} />
                         </div>
                         <div className="relative z-10">
@@ -29,9 +29,9 @@ export default function Dashboard() {
                     </div>
 
                     {/* Stat 2 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
-                        <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 relative z-10">
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
+                        <div className="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center shrink-0 relative z-10">
                             <MapPin size={24} />
                         </div>
                         <div className="relative z-10">
@@ -41,7 +41,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Stat 3 */}
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group">
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow">
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
                         <div className="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0 relative z-10">
                             <AlertTriangle size={24} />
@@ -52,8 +52,8 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Stat 4 */}
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 shadow-sm border border-transparent text-white flex items-center gap-4 relative overflow-hidden group">
+                    {/* Stat 4 - Green gradient */}
+                    <div className="rounded-2xl p-5 shadow-sm border border-transparent text-white flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow" style={{ background: 'linear-gradient(135deg, #1a5c3a 0%, #22c55e 100%)' }}>
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
                         <div className="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 relative z-10 backdrop-blur-sm">
                             <Activity size={24} />
@@ -67,91 +67,63 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Chart Area */}
-                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 lg:col-span-2">
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-base font-bold text-gray-800">Progress Survei EHRA</h3>
-                            <select className="bg-gray-50 border-none text-sm rounded-lg text-gray-600 focus:ring-blue-500 py-1.5 px-3">
+                            <select className="bg-gray-50 border border-gray-200 text-sm rounded-lg text-gray-600 focus:ring-emerald-500 focus:border-emerald-500 py-1.5 px-3">
                                 <option>Bulan Ini</option>
                                 <option>Bulan Lalu</option>
                             </select>
                         </div>
-                        {/* Placeholder for Chart */}
                         <div className="h-[250px] w-full flex items-end gap-2 text-xs text-gray-400">
-                            {/* Mock Bars */}
                             {[40, 60, 45, 80, 50, 90, 70, 65, 85, 100].map((h, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div className="w-full relative rounded-t-sm overflow-hidden bg-gray-100 flex items-end h-[200px]">
-                                        <div 
-                                            className="w-full bg-blue-500 group-hover:bg-blue-600 transition-colors rounded-t-sm" 
-                                            style={{ height: `${h}%` }}
+                                    <div className="w-full relative rounded-t-lg overflow-hidden bg-gray-50 flex items-end h-[200px]">
+                                        <div
+                                            className="w-full rounded-t-lg transition-all duration-300"
+                                            style={{ height: `${h}%`, background: `linear-gradient(180deg, #22c55e 0%, #1a5c3a 100%)` }}
                                         ></div>
                                     </div>
-                                    <span>T{i+1}</span>
+                                    <span className="font-medium">T{i+1}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Right Column - Status/Activities */}
+                    {/* Right Column */}
                     <div className="space-y-6">
-                        {/* Risk Distribution Card */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        {/* Risk Distribution */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                             <h3 className="text-base font-bold text-gray-800 mb-4">Distribusi Risiko</h3>
                             <div className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600 font-medium">Sangat Tinggi</span>
-                                        <span className="text-gray-800 font-bold">5%</span>
+                                {[
+                                    { name: 'Sangat Tinggi', pct: 5, color: '#e01b24' },
+                                    { name: 'Tinggi', pct: 14, color: '#f6d32d' },
+                                    { name: 'Sedang', pct: 45, color: '#1c71d8' },
+                                    { name: 'Kurang Berisiko', pct: 26, color: '#2ec27e' },
+                                ].map((item, i) => (
+                                    <div key={i}>
+                                        <div className="flex justify-between text-sm mb-1.5">
+                                            <span className="text-gray-600 font-medium flex items-center gap-2">
+                                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
+                                                {item.name}
+                                            </span>
+                                            <span className="text-gray-800 font-bold">{item.pct}%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-100 rounded-full h-2">
+                                            <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-rose-500 h-2 rounded-full" style={{ width: '5%' }}></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600 font-medium">Tinggi</span>
-                                        <span className="text-gray-800 font-bold">14%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-orange-500 h-2 rounded-full" style={{ width: '14%' }}></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600 font-medium">Sedang</span>
-                                        <span className="text-gray-800 font-bold">45%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-amber-400 h-2 rounded-full" style={{ width: '45%' }}></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600 font-medium">Kurang Berisiko</span>
-                                        <span className="text-gray-800 font-bold">26%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '26%' }}></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="text-gray-600 font-medium">Tidak Berisiko</span>
-                                        <span className="text-gray-800 font-bold">10%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '10%' }}></div>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Recent Activity Mini */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                        {/* Recent Activity */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                             <h3 className="text-base font-bold text-gray-800 mb-4">Aktivitas Terbaru</h3>
                             <div className="space-y-4">
                                 <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
                                         <CheckCircle2 size={16} />
                                     </div>
                                     <div>
@@ -169,7 +141,7 @@ export default function Dashboard() {
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0">
                                         <TrendingUp size={16} />
                                     </div>
                                     <div>
@@ -182,26 +154,26 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Table Placeholder */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                {/* Table */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/30">
                         <h3 className="text-base font-bold text-gray-800">Status Survei per Desa</h3>
-                        <button className="text-sm text-blue-600 font-medium hover:text-blue-700">Lihat Semua</button>
+                        <button className="text-sm font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Lihat Semua</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-600 font-medium">
+                            <thead className="bg-gray-50/50 text-gray-500 font-semibold uppercase tracking-wider text-[11px] border-b border-gray-100">
                                 <tr>
-                                    <th className="px-6 py-3">Kelurahan/Desa</th>
-                                    <th className="px-6 py-3">Kecamatan</th>
-                                    <th className="px-6 py-3">Progress</th>
-                                    <th className="px-6 py-3">Status Risiko</th>
-                                    <th className="px-6 py-3 text-right">Aksi</th>
+                                    <th className="px-6 py-3.5">Kelurahan/Desa</th>
+                                    <th className="px-6 py-3.5">Kecamatan</th>
+                                    <th className="px-6 py-3.5">Progress</th>
+                                    <th className="px-6 py-3.5">Status Risiko</th>
+                                    <th className="px-6 py-3.5 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                <tr className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 font-medium text-gray-800">Mekar Jaya</td>
+                                <tr className="hover:bg-emerald-50/30 transition-colors">
+                                    <td className="px-6 py-4 font-semibold text-gray-800">Mekar Jaya</td>
                                     <td className="px-6 py-4 text-gray-600">Suka Karya</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
@@ -212,32 +184,32 @@ export default function Dashboard() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-full text-xs font-semibold border border-rose-100">Tinggi</span>
+                                        <span className="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-md text-xs font-bold border border-rose-100">Tinggi</span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-600 hover:text-blue-800 font-medium">Detail</button>
+                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
                                     </td>
                                 </tr>
-                                <tr className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 font-medium text-gray-800">Suka Maju</td>
+                                <tr className="hover:bg-emerald-50/30 transition-colors">
+                                    <td className="px-6 py-4 font-semibold text-gray-800">Suka Maju</td>
                                     <td className="px-6 py-4 text-gray-600">Suka Karya</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
                                             <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[100px]">
-                                                <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '60%' }}></div>
+                                                <div className="h-1.5 rounded-full" style={{ width: '60%', backgroundColor: '#1a5c3a' }}></div>
                                             </div>
                                             <span className="text-xs font-medium text-gray-600">24/40</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full text-xs font-semibold border border-amber-100">Sedang</span>
+                                        <span className="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-md text-xs font-bold border border-amber-100">Sedang</span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-600 hover:text-blue-800 font-medium">Detail</button>
+                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
                                     </td>
                                 </tr>
-                                <tr className="hover:bg-gray-50/50">
-                                    <td className="px-6 py-4 font-medium text-gray-800">Tirta Jaya</td>
+                                <tr className="hover:bg-emerald-50/30 transition-colors">
+                                    <td className="px-6 py-4 font-semibold text-gray-800">Tirta Jaya</td>
                                     <td className="px-6 py-4 text-gray-600">Suka Karya</td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-2">
@@ -248,10 +220,10 @@ export default function Dashboard() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold border border-gray-200">Belum Dianalisis</span>
+                                        <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-bold border border-gray-200">Belum Dianalisis</span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <button className="text-blue-600 hover:text-blue-800 font-medium">Detail</button>
+                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
                                     </td>
                                 </tr>
                             </tbody>
