@@ -257,7 +257,6 @@ class EhraQuestionnaireSeeder extends Seeder
                 'option_label' => $opt['label'],
                 'sort_order'   => $index + 1,
                 'is_risk_flag' => $opt['risk'] ?? false,
-                'risk_weight'  => isset($opt['risk']) && $opt['risk'] ? ($opt['risk_weight'] ?? null) : null,
             ]);
             $count++;
         }
