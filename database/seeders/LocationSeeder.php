@@ -38,7 +38,8 @@ class LocationSeeder extends Seeder
         $version = QuestionnaireVersion::firstOrCreate(
             ['is_active' => true],
             [
-                'name' => 'EHRA 2026',
+                'title' => 'EHRA 2026',
+                'version_code' => 'EHRA-2026',
                 'description' => 'Kuesioner Default'
             ]
         );
@@ -116,26 +117,22 @@ class LocationSeeder extends Seeder
         shuffle($insertedVillages);
         $villagesWithData = array_slice($insertedVillages, 0, $villagesWithDataCount);
 
-        $riskCategories = [
-            ['tinggi', '#f97316'],
-            ['sangat_tinggi', '#f43f5e'],
-            ['sedang', '#fbbf24'],
-            ['kurang_berisiko', '#3b82f6'],
-            ['tidak_berisiko', '#10b981'],
-        ];
+        $riskCategories = \App\Models\RiskAspectCategory::all();
 
         $resultsToInsert = [];
         foreach ($villagesWithData as $villageId) {
-            $randomRisk = $riskCategories[array_rand($riskCategories)];
             $irsTotal = rand(10, 100);
+            $riskCategory = $riskCategories->first(function ($cat) use ($irsTotal) {
+                return $irsTotal >= $cat->lower_bound && $irsTotal <= $cat->upper_bound;
+            });
+            $categoryId = $riskCategory ? $riskCategory->id : ($riskCategories->first()->id ?? null);
             
             VillageIrsResult::updateOrCreate(
                 ['village_id' => $villageId, 'version_id' => $version->id],
                 [
                     'total_respondents' => rand(20, 100),
                     'irs_total' => $irsTotal,
-                    'risk_category' => $randomRisk[0],
-                    'risk_color' => $randomRisk[1],
+                    'risk_aspect_category_id' => $categoryId,
                     'is_published' => true,
                     'calculated_at' => now(),
                     'component_scores' => [],

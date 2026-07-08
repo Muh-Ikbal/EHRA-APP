@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         if (User::count() === 0) {
             User::factory()->create([
                 'name'  => 'Administrator EHRA',
-                'email' => 'admin@ehra.go.id',
+                'email' => 'admin@ehra.com,',
                 'role'  => 'admin',
             ]);
         }
