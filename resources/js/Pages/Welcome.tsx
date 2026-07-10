@@ -235,7 +235,7 @@ export default function Welcome({
                     backgroundColor: '#059669',
                 }}>
                     <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
-                        <Activity size={20} color="#fff" className="flex-shrink-0 sm:w-[22px] sm:h-[22px]" />
+                        <img src="/assets/images/ehra-logo.png" alt="Logo EHRA" className="h-8 w-auto sm:h-9 object-contain bg-white rounded-lg p-1" />
                         <span className="text-white text-sm sm:text-base font-bold tracking-tight truncate">
                             EHRA <span className="font-normal opacity-80 hidden sm:inline">Dashboard Publik</span>
                         </span>

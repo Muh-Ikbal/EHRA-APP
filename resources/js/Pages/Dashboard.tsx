@@ -53,7 +53,7 @@ export default function Dashboard({ stats, riskDistribution, recentSurveys, surv
                     </div>
 
                     {/* Stat 4 - Green gradient */}
-                    <div className="rounded-2xl p-5 shadow-sm border border-transparent text-white flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow" style={{ background: 'linear-gradient(135deg, #1a5c3a 0%, #22c55e 100%)' }}>
+                    <div className="rounded-2xl p-5 shadow-sm border border-transparent text-white flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow" style={{ background: '#059669' }}>
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
                         <div className="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 relative z-10 backdrop-blur-sm">
                             <Activity size={24} />

@@ -72,9 +72,7 @@ export default function Authenticated({
                 {/* Logo Area */}
                 <div className="h-16 flex items-center px-5 border-b border-gray-100">
                     <Link href="/" className="flex items-center gap-3 w-full">
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: '#059669' }}>
-                            <Map size={18} className="text-white" strokeWidth={2.5} />
-                        </div>
+                        <img src="/assets/images/ehra-logo.png" alt="EHRA Logo" className="w-9 h-9 object-contain shrink-0" />
                         {sidebarOpen && (
                             <div className="flex flex-col">
                                 <span className="text-[15px] font-bold text-gray-800 tracking-tight leading-tight">
