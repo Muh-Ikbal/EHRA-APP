@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, TrendingUp, Users } from 'lucide-react';
 
-export default function Dashboard() {
+export default function Dashboard({ stats, riskDistribution, recentSurveys, surveyProgress }: any) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +24,7 @@ export default function Dashboard() {
                         </div>
                         <div className="relative z-10">
                             <p className="text-sm font-medium text-gray-500 mb-1">Total Survei</p>
-                            <h3 className="text-2xl font-bold text-gray-800">1,248</h3>
+                            <h3 className="text-2xl font-bold text-gray-800">{stats.total_surveys}</h3>
                         </div>
                     </div>
 
@@ -36,7 +36,7 @@ export default function Dashboard() {
                         </div>
                         <div className="relative z-10">
                             <p className="text-sm font-medium text-gray-500 mb-1">Desa Tersurvei</p>
-                            <h3 className="text-2xl font-bold text-gray-800">86 <span className="text-sm font-normal text-gray-400">/ 124</span></h3>
+                            <h3 className="text-2xl font-bold text-gray-800">{stats.surveyed_villages} <span className="text-sm font-normal text-gray-400">/ {stats.total_villages}</span></h3>
                         </div>
                     </div>
 
@@ -48,7 +48,7 @@ export default function Dashboard() {
                         </div>
                         <div className="relative z-10">
                             <p className="text-sm font-medium text-gray-500 mb-1">Risiko Tinggi</p>
-                            <h3 className="text-2xl font-bold text-gray-800">12 <span className="text-sm font-normal text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full ml-1">14%</span></h3>
+                            <h3 className="text-2xl font-bold text-gray-800">{stats.high_risk_count} <span className="text-sm font-normal text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full ml-1">{stats.high_risk_percentage}%</span></h3>
                         </div>
                     </div>
 
@@ -60,7 +60,7 @@ export default function Dashboard() {
                         </div>
                         <div className="relative z-10">
                             <p className="text-sm font-medium text-white/80 mb-1">Indeks Risiko</p>
-                            <h3 className="text-2xl font-bold text-white">Sedang</h3>
+                            <h3 className="text-2xl font-bold text-white">{stats.average_risk_name}</h3>
                         </div>
                     </div>
                 </div>
@@ -76,15 +76,15 @@ export default function Dashboard() {
                             </select>
                         </div>
                         <div className="h-[250px] w-full flex items-end gap-2 text-xs text-gray-400">
-                            {[40, 60, 45, 80, 50, 90, 70, 65, 85, 100].map((h, i) => (
+                            {surveyProgress.map((p: any, i: number) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div className="w-full relative rounded-t-lg overflow-hidden bg-gray-50 flex items-end h-[200px]">
+                                    <div className="w-full relative rounded-t-lg overflow-hidden bg-gray-50 flex items-end h-[200px]" title={`${p.value} Survei`}>
                                         <div
                                             className="w-full rounded-t-lg transition-all duration-300"
-                                            style={{ height: `${h}%`, background: `linear-gradient(180deg, #22c55e 0%, #1a5c3a 100%)` }}
+                                            style={{ height: `${p.height}%`, background: `#059669` }}
                                         ></div>
                                     </div>
-                                    <span className="font-medium">T{i+1}</span>
+                                    <span className="font-medium">{p.label}</span>
                                 </div>
                             ))}
                         </div>
@@ -96,19 +96,14 @@ export default function Dashboard() {
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                             <h3 className="text-base font-bold text-gray-800 mb-4">Distribusi Risiko</h3>
                             <div className="space-y-4">
-                                {[
-                                    { name: 'Sangat Tinggi', pct: 5, color: '#e01b24' },
-                                    { name: 'Tinggi', pct: 14, color: '#f6d32d' },
-                                    { name: 'Sedang', pct: 45, color: '#1c71d8' },
-                                    { name: 'Kurang Berisiko', pct: 26, color: '#2ec27e' },
-                                ].map((item, i) => (
+                                {riskDistribution.map((item: any, i: number) => (
                                     <div key={i}>
                                         <div className="flex justify-between text-sm mb-1.5">
                                             <span className="text-gray-600 font-medium flex items-center gap-2">
                                                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
                                                 {item.name}
                                             </span>
-                                            <span className="text-gray-800 font-bold">{item.pct}%</span>
+                                            <span className="text-gray-800 font-bold">{item.pct}% <span className="text-gray-400 font-normal text-xs">({item.count})</span></span>
                                         </div>
                                         <div className="w-full bg-gray-100 rounded-full h-2">
                                             <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
@@ -157,75 +152,39 @@ export default function Dashboard() {
                 {/* Table */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                     <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/30">
-                        <h3 className="text-base font-bold text-gray-800">Status Survei per Desa</h3>
+                        <h3 className="text-base font-bold text-gray-800">Survei Terbaru</h3>
                         <button className="text-sm font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Lihat Semua</button>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
                             <thead className="bg-gray-50/50 text-gray-500 font-semibold uppercase tracking-wider text-[11px] border-b border-gray-100">
                                 <tr>
+                                    <th className="px-6 py-3.5">Tanggal</th>
                                     <th className="px-6 py-3.5">Kelurahan/Desa</th>
                                     <th className="px-6 py-3.5">Kecamatan</th>
-                                    <th className="px-6 py-3.5">Progress</th>
-                                    <th className="px-6 py-3.5">Status Risiko</th>
-                                    <th className="px-6 py-3.5 text-right">Aksi</th>
+                                    <th className="px-6 py-3.5">Enumerator</th>
+                                    <th className="px-6 py-3.5 text-right">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                <tr className="hover:bg-emerald-50/30 transition-colors">
-                                    <td className="px-6 py-4 font-semibold text-gray-800">Mekar Jaya</td>
-                                    <td className="px-6 py-4 text-gray-600">Suka Karya</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[100px]">
-                                                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '100%' }}></div>
-                                            </div>
-                                            <span className="text-xs font-medium text-emerald-600">40/40</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-rose-50 text-rose-600 rounded-md text-xs font-bold border border-rose-100">Tinggi</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
-                                    </td>
-                                </tr>
-                                <tr className="hover:bg-emerald-50/30 transition-colors">
-                                    <td className="px-6 py-4 font-semibold text-gray-800">Suka Maju</td>
-                                    <td className="px-6 py-4 text-gray-600">Suka Karya</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[100px]">
-                                                <div className="h-1.5 rounded-full" style={{ width: '60%', backgroundColor: '#1a5c3a' }}></div>
-                                            </div>
-                                            <span className="text-xs font-medium text-gray-600">24/40</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-amber-50 text-amber-600 rounded-md text-xs font-bold border border-amber-100">Sedang</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
-                                    </td>
-                                </tr>
-                                <tr className="hover:bg-emerald-50/30 transition-colors">
-                                    <td className="px-6 py-4 font-semibold text-gray-800">Tirta Jaya</td>
-                                    <td className="px-6 py-4 text-gray-600">Suka Karya</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-full bg-gray-100 rounded-full h-1.5 max-w-[100px]">
-                                                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '10%' }}></div>
-                                            </div>
-                                            <span className="text-xs font-medium text-gray-600">4/40</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-xs font-bold border border-gray-200">Belum Dianalisis</span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button className="font-semibold hover:text-emerald-700 transition-colors" style={{ color: '#1a5c3a' }}>Detail</button>
-                                    </td>
-                                </tr>
+                                {recentSurveys.map((survey: any) => (
+                                    <tr key={survey.id} className="hover:bg-emerald-50/30 transition-colors">
+                                        <td className="px-6 py-4 text-gray-500">{survey.date}</td>
+                                        <td className="px-6 py-4 font-semibold text-gray-800">{survey.village_name}</td>
+                                        <td className="px-6 py-4 text-gray-600">{survey.district_name}</td>
+                                        <td className="px-6 py-4 text-gray-600">{survey.enumerator_name}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-md text-xs font-bold border border-emerald-100">
+                                                {survey.status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {recentSurveys.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-8 text-center text-gray-400">Belum ada survei.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

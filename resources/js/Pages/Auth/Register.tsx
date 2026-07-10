@@ -19,44 +19,34 @@ export default function Register() {
     };
 
     return (
-        <div className="flex min-h-screen font-sans bg-gray-50">
+        <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8fafc' }}>
             <Head title="Daftar — EHRA" />
 
-            {/* Left Side - Dark gradient to match logo */}
-            <div className="hidden lg:flex lg:w-1/2 relative text-white flex-col justify-between overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a1628 0%, #0d2137 30%, #0f3043 60%, #134a3f 100%)' }}>
-                {/* Subtle decorative circles */}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                    <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-[0.07]" style={{ background: 'radial-gradient(circle, #2196F3, transparent)' }}></div>
-                    <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full opacity-[0.05]" style={{ background: 'radial-gradient(circle, #4CAF50, transparent)' }}></div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.03]" style={{ background: 'radial-gradient(circle, #00BCD4, transparent)' }}></div>
-                </div>
-
-                {/* Decorative wave lines */}
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
-                    <svg className="absolute w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <path d="M0,65 Q15,55 30,65 T60,65 T100,60" fill="none" stroke="#4CAF50" strokeWidth="0.3" />
-                        <path d="M0,72 Q20,62 40,72 T80,70 T100,68" fill="none" stroke="#2196F3" strokeWidth="0.3" />
-                        <path d="M0,80 Q25,70 50,80 T100,78" fill="none" stroke="#00BCD4" strokeWidth="0.3" />
-                    </svg>
+            {/* Left Side - Clean solid emerald */}
+            <div className="hidden lg:flex lg:w-1/2 relative text-white flex-col justify-between overflow-hidden" style={{ backgroundColor: '#059669' }}>
+                {/* Subtle decorative pattern */}
+                <div className="absolute inset-0 opacity-[0.06] pointer-events-none">
+                    <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full" style={{ backgroundColor: '#fff' }}></div>
+                    <div className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full" style={{ backgroundColor: '#fff' }}></div>
                 </div>
 
                 <div className="p-12 relative z-10 flex flex-col h-full items-center justify-center text-center">
-                    {/* Logo - displayed in a card */}
-                    <div className="mb-10 bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/10">
+                    {/* Logo - white card so it pops */}
+                    <div className="mb-10 bg-white rounded-2xl p-8 shadow-lg">
                         <img
                             src="/assets/images/logo.png"
                             alt="EHRA Logo"
-                            className="h-44 w-auto mx-auto drop-shadow-lg"
+                            className="h-44 w-auto mx-auto"
                         />
                     </div>
 
-                    <p className="text-base max-w-sm text-gray-300 font-medium leading-relaxed">
+                    <p className="text-base max-w-sm text-white/90 font-medium leading-relaxed">
                         Studi Penilaian Risiko Kesehatan Lingkungan untuk mendukung sanitasi yang lebih baik di komunitas Anda.
                     </p>
                 </div>
 
                 <div className="p-8 relative z-10 text-center">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-white/50">
                         © {new Date().getFullYear()} EHRA — Environmental Health Risk Assessment
                     </p>
                 </div>
@@ -73,7 +63,7 @@ export default function Register() {
                     <div className="mb-10">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">Buat Akun Baru!</h2>
                         <p className="text-sm text-gray-500">
-                            Sudah punya akun? <Link href={route('login')} className="font-semibold underline" style={{ color: '#1a6b4a' }}>Masuk sekarang</Link>
+                            Sudah punya akun? <Link href={route('login')} className="font-semibold underline" style={{ color: '#059669' }}>Masuk sekarang</Link>
                         </p>
                     </div>
 
@@ -85,8 +75,8 @@ export default function Register() {
                                 name="name"
                                 value={data.name}
                                 className="w-full border-0 border-b-2 border-gray-200 bg-transparent py-3 text-gray-900 focus:ring-0 placeholder:text-gray-400 font-medium transition-colors"
-                                style={{ borderBottomColor: data.name ? '#1a6b4a' : undefined }}
-                                onFocus={(e) => e.target.style.borderBottomColor = '#1a6b4a'}
+                                style={{ borderBottomColor: data.name ? '#059669' : undefined }}
+                                onFocus={(e) => e.target.style.borderBottomColor = '#059669'}
                                 onBlur={(e) => { if (!data.name) e.target.style.borderBottomColor = '' }}
                                 placeholder="Nama Lengkap"
                                 autoComplete="name"
@@ -103,8 +93,8 @@ export default function Register() {
                                 name="email"
                                 value={data.email}
                                 className="w-full border-0 border-b-2 border-gray-200 bg-transparent py-3 text-gray-900 focus:ring-0 placeholder:text-gray-400 font-medium transition-colors"
-                                style={{ borderBottomColor: data.email ? '#1a6b4a' : undefined }}
-                                onFocus={(e) => e.target.style.borderBottomColor = '#1a6b4a'}
+                                style={{ borderBottomColor: data.email ? '#059669' : undefined }}
+                                onFocus={(e) => e.target.style.borderBottomColor = '#059669'}
                                 onBlur={(e) => { if (!data.email) e.target.style.borderBottomColor = '' }}
                                 placeholder="Alamat Email"
                                 autoComplete="username"
@@ -121,8 +111,8 @@ export default function Register() {
                                 name="password"
                                 value={data.password}
                                 className="w-full border-0 border-b-2 border-gray-200 bg-transparent py-3 text-gray-900 focus:ring-0 placeholder:text-gray-400 font-medium transition-colors"
-                                style={{ borderBottomColor: data.password ? '#1a6b4a' : undefined }}
-                                onFocus={(e) => e.target.style.borderBottomColor = '#1a6b4a'}
+                                style={{ borderBottomColor: data.password ? '#059669' : undefined }}
+                                onFocus={(e) => e.target.style.borderBottomColor = '#059669'}
                                 onBlur={(e) => { if (!data.password) e.target.style.borderBottomColor = '' }}
                                 placeholder="Password"
                                 autoComplete="new-password"
@@ -139,8 +129,8 @@ export default function Register() {
                                 name="password_confirmation"
                                 value={data.password_confirmation}
                                 className="w-full border-0 border-b-2 border-gray-200 bg-transparent py-3 text-gray-900 focus:ring-0 placeholder:text-gray-400 font-medium transition-colors"
-                                style={{ borderBottomColor: data.password_confirmation ? '#1a6b4a' : undefined }}
-                                onFocus={(e) => e.target.style.borderBottomColor = '#1a6b4a'}
+                                style={{ borderBottomColor: data.password_confirmation ? '#059669' : undefined }}
+                                onFocus={(e) => e.target.style.borderBottomColor = '#059669'}
                                 onBlur={(e) => { if (!data.password_confirmation) e.target.style.borderBottomColor = '' }}
                                 placeholder="Konfirmasi Password"
                                 autoComplete="new-password"
@@ -154,7 +144,10 @@ export default function Register() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#1A1A1A] hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-75 transition-colors"
+                                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-75 transition-colors"
+                                style={{ backgroundColor: '#059669' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#047857'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#059669'}
                             >
                                 Daftar Sekarang
                             </button>
@@ -165,3 +158,4 @@ export default function Register() {
         </div>
     );
 }
+

@@ -113,17 +113,19 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                             })}
                         </div>
                     </div>
-                    
-                    <button
-                        onClick={() => openModal()}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-sm"
-                    >
-                        <Plus size={18} /> Tambah Data
-                    </button>
                 </div>
             }
         >
             <Head title="Manajemen Lokasi Survei" />
+
+            <div className="flex justify-end mb-6">
+                <button
+                    onClick={() => openModal()}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-colors shadow-sm w-full sm:w-auto shrink-0"
+                >
+                    <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" /> Tambah Data
+                </button>
+            </div>
 
             {flash?.success && (
                 <div className="mb-6 p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 flex items-center gap-2">
@@ -135,7 +137,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                        <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                             <tr>
                                 <th className="px-6 py-4">Nama Wilayah</th>
                                 {level === 'city' && <th className="px-6 py-4">Tipe & GeoJSON</th>}

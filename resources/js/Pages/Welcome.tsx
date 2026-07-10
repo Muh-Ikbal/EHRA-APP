@@ -1,5 +1,5 @@
 import { PageProps } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Activity } from 'lucide-react';
 import { MapContainer, TileLayer, GeoJSON, CircleMarker, useMap } from 'react-leaflet';
 import { useEffect, useState, useMemo } from 'react';
@@ -35,6 +35,8 @@ interface WelcomeProps {
     mapData?: Record<string, VillageData>;
     riskCategories?: RiskCategory[];
     cityList?: string[];
+    version? : {id:string; version_code:string; title:string};
+    selectedVersionId?: string | null;
 }
 
 function MapController({ geoData, selectedKabupaten }: { geoData: any; selectedKabupaten: string }) {
@@ -64,11 +66,15 @@ function getPolygonCentroid(feature: any): [number, number] | null {
 }
 
 export default function Welcome({
-    auth, mapData = {}, riskCategories = [], cityList = [],
+    auth, mapData = {}, riskCategories = [], cityList = [], versions = [], selectedVersionId = null
 }: PageProps<WelcomeProps>) {
     const [geoData, setGeoData] = useState<any>(null);
     const [selectedKabupaten, setSelectedKabupaten] = useState<string>('');
     const [selectedRow, setSelectedRow] = useState<string | null>(null);
+
+    const handleVersionChange = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+        router.get('/', {version: e.target.value}, {preserveState:true})
+    }
 
     useEffect(() => {
         fetch('/data/sultra.geojson')
@@ -223,49 +229,63 @@ export default function Welcome({
     return (
         <>
             <Head title="Dashboard EHRA" />
-            <div style={{ minHeight: '100vh', backgroundColor: '#f0f4f3', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+            <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
                 {/* Navbar */}
-                <nav style={{
-                    background: 'linear-gradient(135deg, #1a5c3a 0%, #217a4b 50%, #2d8a56 100%)',
-                    padding: '0 20px', height: '48px', display: 'flex', alignItems: 'center',
-                    justifyContent: 'space-between', boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                <nav className="flex items-center justify-between px-3 sm:px-5 py-2.5 sm:py-3 shadow-sm z-50 relative" style={{
+                    backgroundColor: '#059669',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Activity size={22} color="#fff" />
-                        <span style={{ color: '#fff', fontSize: '16px', fontWeight: 700, letterSpacing: '-0.3px' }}>
-                            EHRA <span style={{ fontWeight: 400, opacity: 0.8 }}>Dashboard Publik</span>
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
+                        <Activity size={20} color="#fff" className="flex-shrink-0 sm:w-[22px] sm:h-[22px]" />
+                        <span className="text-white text-sm sm:text-base font-bold tracking-tight truncate">
+                            EHRA <span className="font-normal opacity-80 hidden sm:inline">Dashboard Publik</span>
                         </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
                         {auth.user ? (
-                            <Link href={route('dashboard')} style={{
-                                color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
-                                padding: '6px 16px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.15)',
-                            }}>Dashboard</Link>
+                            <Link href={route('dashboard')} className="text-white text-[11px] sm:text-[13px] font-semibold no-underline px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white/15 hover:bg-white/20 transition-colors whitespace-nowrap">
+                                Dashboard
+                            </Link>
                         ) : (
                             <>
-                                <Link href={route('login')} style={{
-                                    color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
-                                    padding: '6px 16px', borderRadius: '6px',
-                                }}>Log in</Link>
-                                <Link href={route('register')} style={{
-                                    color: '#1a5c3a', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
-                                    padding: '6px 16px', borderRadius: '6px', backgroundColor: '#fff',
-                                }}>Register</Link>
+                                <Link href={route('login')} className="text-white text-[11px] sm:text-[13px] font-semibold no-underline px-2 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-white/10 transition-colors whitespace-nowrap">
+                                    Log in
+                                </Link>
+                                <Link href={route('register')} className="text-[#059669] text-[11px] sm:text-[13px] font-semibold no-underline px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm whitespace-nowrap">
+                                    Register
+                                </Link>
                             </>
                         )}
                     </div>
                 </nav>
 
                 {/* Main Content */}
-                <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 320px', gap: '0', height: 'calc(100vh - 48px - 240px)' }}>
+                <div className="flex flex-col lg:grid lg:grid-cols-[260px_1fr_320px] gap-0 lg:h-[calc(100vh-48px-240px)] min-h-[500px] lg:min-h-0">
                     {/* Left Sidebar */}
                     <div style={{
                         backgroundColor: '#fff', borderRight: '1px solid #e2e8e0', padding: '16px',
                         overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px',
                     }}>
+                        <div style={{marginBottom:'16px'}}>
+                            <label style={{fontSize: '11px', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                                Versi Kuiseioner
+                            </label>
+                            <select
+                                value={selectedVersionId || ''}
+                                onChange={handleVersionChange}
+                                style={{
+                                    width: '100%', padding: '8px 10px', border: '1px solid #d1d5db', borderRadius: '6px',
+                                    fontSize: '13px', fontWeight: 500, backgroundColor: '#fff', cursor: 'pointer',
+                                }}
+                            >
+                                {versions.map(v => (
+                                    <option key={v.id} value={v.id}>
+                                        {v.version_code}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div>
-                            <label style={{ fontSize: '11px', fontWeight: 700, color: '#1a5c3a', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
+                            <label style={{ fontSize: '11px', fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', display: 'block' }}>
                                 Pilih Kabupaten / Kota Sultra
                             </label>
                             <select
@@ -279,7 +299,9 @@ export default function Welcome({
                                 <option value="">Seluruh Wilayah</option>
                                 {cityList.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
+
                         </div>
+                        
 
                         <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '14px' }}>
                             <h4 style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 10px' }}>
@@ -307,11 +329,11 @@ export default function Welcome({
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                                     <span style={{ color: '#6b7280' }}>Total Desa Tersurvei</span>
-                                    <span style={{ fontWeight: 700, color: '#1a5c3a' }}>{Object.keys(filteredMapData).length}</span>
+                                    <span style={{ fontWeight: 700, color: '#059669' }}>{Object.keys(filteredMapData).length}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
                                     <span style={{ color: '#6b7280' }}>Total Responden</span>
-                                    <span style={{ fontWeight: 700, color: '#1a5c3a' }}>
+                                    <span style={{ fontWeight: 700, color: '#059669' }}>
                                         {Object.values(filteredMapData).reduce((s, v) => s + (v.total_respondents || 0), 0)}
                                     </span>
                                 </div>
@@ -320,7 +342,7 @@ export default function Welcome({
                     </div>
 
                     {/* Map Center */}
-                    <div style={{ position: 'relative' }}>
+                    <div className="relative h-[400px] lg:h-auto lg:min-h-full">
                         <MapContainer center={[-4.14491, 122.174605]} zoom={7} scrollWheelZoom={true}
                             style={{ height: '100%', width: '100%', backgroundColor: '#e8f0ec' }}>
                             <TileLayer
@@ -344,19 +366,19 @@ export default function Welcome({
 
                     {/* Right Panel - Table */}
                     <div style={{
-                        backgroundColor: '#fff', borderLeft: '1px solid #e2e8e0',
+                        backgroundColor: '#fff', borderLeft: '1px solid #e2e8e0', borderTop: '1px solid #e2e8e0',
                         display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                    }}>
+                    }} className="lg:border-t-0">
                         <div style={{ padding: '14px 16px', borderBottom: '1px solid #e5e7eb' }}>
-                            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#1a5c3a', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#059669', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                                 Matriks Desa/Kelurahan Skala Mikro
                             </h3>
                             <p style={{ fontSize: '10px', color: '#6b7280', margin: '4px 0 0' }}>
                                 Klik baris tabel untuk melihat detail
                             </p>
                         </div>
-                        <div style={{ overflowY: 'auto', flex: 1 }}>
-                            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                        <div className="overflow-x-auto overflow-y-auto flex-1">
+                            <table style={{ width: '100%', minWidth: '400px', fontSize: '12px', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ backgroundColor: '#f8faf9', borderBottom: '2px solid #e5e7eb' }}>
                                         <th style={{ padding: '8px 10px', textAlign: 'left', fontSize: '10px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase' }}>Kode</th>
@@ -402,10 +424,7 @@ export default function Welcome({
                 </div>
 
                 {/* Bottom Charts Row */}
-                <div style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px',
-                    padding: '12px 12px 16px', backgroundColor: '#f0f4f3',
-                }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 p-3 pb-4 bg-[#f8fafc] h-auto lg:h-[240px]">
                     {/* Chart 1 - Facility Sanitation */}
                     <div style={{ backgroundColor: '#fff', borderRadius: '8px', padding: '14px', border: '1px solid #e2e8e0', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                         <div style={{ height: '200px' }}>

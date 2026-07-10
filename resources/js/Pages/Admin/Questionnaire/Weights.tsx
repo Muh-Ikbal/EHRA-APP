@@ -185,7 +185,7 @@ export default function Weights({ version, components, questions, weights, flash
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm text-left">
-                                        <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                                        <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                                             <tr>
                                                 <th className="px-6 py-4 w-1/2">Pertanyaan Terkait</th>
                                                 <th className="px-6 py-4">Kondisi (Jawaban)</th>

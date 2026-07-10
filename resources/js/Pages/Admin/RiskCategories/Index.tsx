@@ -69,29 +69,33 @@ export default function Index({ categories, filters, flash }: any) {
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <ShieldAlert className="text-indigo-600" />
+                        <h2 className="text-base sm:text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
+                            <ShieldAlert className="text-emerald-600 w-5 h-5 sm:w-6 sm:h-6" />
                             Kategori Aspek Risiko
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">Kelola standar batas nilai (interval) dan warna kategori risiko EHRA</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Kelola standar batas nilai (interval) dan warna kategori risiko EHRA</p>
                     </div>
-                    {!isCreating && !editingId && (
-                        <button
-                            onClick={startCreate}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors"
-                        >
-                            <Plus size={16} /> Tambah Kategori
-                        </button>
-                    )}
                 </div>
+
             }
         >
             <Head title="Kategori Risiko - Manajemen" />
 
             <div className="max-w-7xl mx-auto pb-12 space-y-6">
-                
+
+                {!isCreating && !editingId && (
+                    <div className="flex justify-end">
+                        <button
+                            onClick={startCreate}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-colors w-full sm:w-auto shrink-0 shadow-sm"
+                        >
+                            <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" /> Tambah Kategori
+                        </button>
+                    </div>
+                )}
+
                 {flash?.success && (
                     <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 flex items-center gap-2">
                         <CheckCircle2 size={18} />
@@ -100,9 +104,9 @@ export default function Index({ categories, filters, flash }: any) {
                 )}
 
                 {(isCreating || editingId) && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 p-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            {editingId ? <Edit size={18} className="text-indigo-600"/> : <Plus size={18} className="text-indigo-600"/>}
+                            {editingId ? <Edit size={18} className="text-emerald-600" /> : <Plus size={18} className="text-emerald-600" />}
                             {editingId ? 'Edit Kategori' : 'Tambah Kategori Baru'}
                         </h3>
                         <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
@@ -112,7 +116,7 @@ export default function Index({ categories, filters, flash }: any) {
                                     type="text"
                                     value={data.category_name}
                                     onChange={e => setData('category_name', e.target.value)}
-                                    className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                    className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                     placeholder="Contoh: Sangat Tinggi"
                                     required
                                 />
@@ -124,7 +128,7 @@ export default function Index({ categories, filters, flash }: any) {
                                     type="number"
                                     value={data.lower_bound}
                                     onChange={e => setData('lower_bound', e.target.value)}
-                                    className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                    className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                     required
                                 />
                                 {errors.lower_bound && <p className="text-rose-500 text-xs mt-1">{errors.lower_bound}</p>}
@@ -135,7 +139,7 @@ export default function Index({ categories, filters, flash }: any) {
                                     type="number"
                                     value={data.upper_bound}
                                     onChange={e => setData('upper_bound', e.target.value)}
-                                    className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                    className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                     required
                                 />
                                 {errors.upper_bound && <p className="text-rose-500 text-xs mt-1">{errors.upper_bound}</p>}
@@ -151,8 +155,8 @@ export default function Index({ categories, filters, flash }: any) {
                                             className="h-9 w-12 rounded border-gray-300 cursor-pointer"
                                             required
                                         />
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={data.color}
                                             readOnly
                                             className="w-full rounded-lg border-gray-300 bg-gray-50 text-sm font-mono text-gray-500"
@@ -172,7 +176,7 @@ export default function Index({ categories, filters, flash }: any) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
                                 >
                                     <Save size={16} /> Simpan
                                 </button>
@@ -184,7 +188,7 @@ export default function Index({ categories, filters, flash }: any) {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                            <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                                 <tr>
                                     <th className="px-6 py-4">Nama Kategori</th>
                                     <th className="px-6 py-4 text-center">Interval Nilai</th>
@@ -205,7 +209,7 @@ export default function Index({ categories, filters, flash }: any) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <div 
+                                                <div
                                                     className="w-6 h-6 rounded-full shadow-sm border border-black/10"
                                                     style={{ backgroundColor: cat.color }}
                                                 ></div>
@@ -215,7 +219,7 @@ export default function Index({ categories, filters, flash }: any) {
                                         <td className="px-6 py-4 flex justify-end gap-2">
                                             <button
                                                 onClick={() => startEdit(cat)}
-                                                className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded transition-colors"
+                                                className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded transition-colors"
                                                 title="Edit"
                                             >
                                                 <Edit size={16} />

@@ -17,6 +17,12 @@ class SurveyResultController extends Controller
         $query = SurveyResponse::with(['enumerator', 'village', 'version'])
             ->latest('submitted_at');
 
+        $user = auth()->user();
+        if ($user && $user->isEnumerator()) {
+            $assignedVillageIds = $user->assignedVillages()->pluck('villages.id');
+            $query->whereIn('village_id', $assignedVillageIds);
+        }
+
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where('respondent_code', 'like', "%{$search}%")
@@ -52,6 +58,14 @@ class SurveyResultController extends Controller
             'answers.question'
         ])->findOrFail($id);
 
+        $user = auth()->user();
+        if ($user && $user->isEnumerator()) {
+            $assignedVillageIds = $user->assignedVillages()->pluck('villages.id')->toArray();
+            if (!in_array($response->village_id, $assignedVillageIds)) {
+                abort(403, 'Akses ditolak. Anda hanya dapat melihat survei dari wilayah tugas Anda.');
+            }
+        }
+
         // Group answers by section to make it easier for the frontend to render
         $sections = \App\Models\Section::where('version_id', $response->version_id)
             ->orderBy('sort_order')
@@ -81,6 +95,14 @@ class SurveyResultController extends Controller
         ]);
 
         $response = SurveyResponse::findOrFail($id);
+
+        $user = auth()->user();
+        if ($user && $user->isEnumerator()) {
+            $assignedVillageIds = $user->assignedVillages()->pluck('villages.id')->toArray();
+            if (!in_array($response->village_id, $assignedVillageIds)) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
         $response->update(['status' => $request->status]);
 
         return back()->with('success', 'Status survei berhasil diperbarui.');
@@ -89,6 +111,14 @@ class SurveyResultController extends Controller
     public function edit($id)
     {
         $response = SurveyResponse::with(['answers'])->findOrFail($id);
+        
+        $user = auth()->user();
+        if ($user && $user->isEnumerator()) {
+            $assignedVillageIds = $user->assignedVillages()->pluck('villages.id')->toArray();
+            if (!in_array($response->village_id, $assignedVillageIds)) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
         
         $version = \App\Models\QuestionnaireVersion::where('id', $response->version_id)
             ->with([
@@ -132,6 +162,14 @@ class SurveyResultController extends Controller
 
         try {
             $surveyResponse = SurveyResponse::findOrFail($id);
+
+            $user = auth()->user();
+            if ($user && $user->isEnumerator()) {
+                $assignedVillageIds = $user->assignedVillages()->pluck('villages.id')->toArray();
+                if (!in_array($surveyResponse->village_id, $assignedVillageIds)) {
+                    abort(403, 'Akses ditolak.');
+                }
+            }
 
             // Delete old answers
             \App\Models\Answer::where('response_id', $surveyResponse->id)->delete();
@@ -178,6 +216,11 @@ class SurveyResultController extends Controller
     {
         try {
             $surveyResponse = SurveyResponse::findOrFail($id);
+
+            $user = auth()->user();
+            if ($user && $user->isEnumerator()) {
+                abort(403, 'Hanya admin yang dapat melakukan kalkulasi ulang IRS.');
+            }
             $calcService = new \App\Services\EhraCalculationService();
             $calcService->calculateForVillage($surveyResponse->village_id, $surveyResponse->version_id);
             
@@ -195,6 +238,11 @@ class SurveyResultController extends Controller
     {
         try {
             $response = SurveyResponse::findOrFail($id);
+            
+            $user = auth()->user();
+            if ($user && $user->isEnumerator()) {
+                abort(403, 'Hanya admin yang dapat menghapus data survei.');
+            }
             $villageId = $response->village_id;
             $versionId = $response->version_id;
 

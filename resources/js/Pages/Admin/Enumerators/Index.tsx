@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Users, Plus, Trash2, Edit, Save, CheckCircle2, Shield, MapPin } from 'lucide-react';
 
-export default function Index({ enumerators, villages, filters, flash }: any) {
+export default function Index({ enumerators, villages, versions, filters, flash }: any) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [searchVillage, setSearchVillage] = useState('');
@@ -17,6 +17,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
         name: '',
         email: '',
         password: '',
+        version_id: '',
         village_ids: [] as string[],
     });
 
@@ -24,10 +25,12 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
         setIsCreating(false);
         setEditingId(enumerator.id);
         setSearchVillage('');
+        const initialVersionId = enumerator.assigned_villages?.[0]?.pivot?.version_id || '';
         setData({
             name: enumerator.name,
             email: enumerator.email,
             password: '',
+            version_id: initialVersionId,
             village_ids: enumerator.assigned_villages?.map((v: any) => v.id) || [],
         });
         clearErrors();
@@ -37,7 +40,12 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
         setEditingId(null);
         setIsCreating(true);
         setSearchVillage('');
+
+        // Find active version as default
+        const activeVersion = versions?.find((v: any) => v.is_active) || versions?.[0];
+
         reset();
+        setData('version_id', activeVersion?.id || '');
         clearErrors();
     };
 
@@ -50,8 +58,8 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
     };
 
     const toggleVillage = (villageId: string) => {
-        setData('village_ids', 
-            data.village_ids.includes(villageId) 
+        setData('village_ids',
+            data.village_ids.includes(villageId)
                 ? data.village_ids.filter(id => id !== villageId)
                 : [...data.village_ids, villageId]
         );
@@ -85,29 +93,32 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                            <Users className="text-indigo-600" />
+                        <h2 className="text-base sm:text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
+                            <Users className="text-emerald-600 w-5 h-5 sm:w-6 sm:h-6" />
                             Manajemen Akun Enumerator
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">Kelola akun dan wilayah tugas enumerator</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">Kelola akun dan wilayah tugas enumerator</p>
                     </div>
-                    {!isCreating && !editingId && (
-                        <button
-                            onClick={startCreate}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors"
-                        >
-                            <Plus size={16} /> Tambah Enumerator
-                        </button>
-                    )}
                 </div>
             }
         >
             <Head title="Enumerator - Manajemen" />
 
             <div className="max-w-7xl mx-auto pb-12 space-y-6">
-                
+
+                {!isCreating && !editingId && (
+                    <div className="flex justify-end">
+                        <button
+                            onClick={startCreate}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 sm:gap-2 transition-colors w-full sm:w-auto shrink-0 shadow-sm"
+                        >
+                            <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" /> Tambah Enumerator
+                        </button>
+                    </div>
+                )}
+
                 {flash?.success && (
                     <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 flex items-center gap-2">
                         <CheckCircle2 size={18} />
@@ -121,13 +132,13 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                 )}
 
                 {(isCreating || editingId) && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-indigo-100 p-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 p-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            {editingId ? <Edit size={18} className="text-indigo-600"/> : <Plus size={18} className="text-indigo-600"/>}
+                            {editingId ? <Edit size={18} className="text-emerald-600" /> : <Plus size={18} className="text-emerald-600" />}
                             {editingId ? 'Edit Akun & Tugas Enumerator' : 'Buat Akun Enumerator Baru'}
                         </h3>
                         <form onSubmit={submit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            
+
                             {/* Kiri: Data Akun */}
                             <div className="space-y-4">
                                 <h4 className="font-semibold text-gray-700 flex items-center gap-2 border-b pb-2">
@@ -139,7 +150,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         type="text"
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
-                                        className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                        className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                         required
                                     />
                                     {errors.name && <p className="text-rose-500 text-xs mt-1">{errors.name}</p>}
@@ -150,7 +161,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         type="email"
                                         value={data.email}
                                         onChange={e => setData('email', e.target.value)}
-                                        className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                        className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                         required
                                     />
                                     {errors.email && <p className="text-rose-500 text-xs mt-1">{errors.email}</p>}
@@ -163,11 +174,28 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         type="password"
                                         value={data.password}
                                         onChange={e => setData('password', e.target.value)}
-                                        className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm"
+                                        className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
                                         required={!editingId}
                                         minLength={8}
                                     />
                                     {errors.password && <p className="text-rose-500 text-xs mt-1">{errors.password}</p>}
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Versi Kuesioner</label>
+                                    <select
+                                        value={data.version_id}
+                                        onChange={e => setData('version_id', e.target.value)}
+                                        className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm"
+                                        required
+                                    >
+                                        <option value="">-- Pilih Versi --</option>
+                                        {versions?.map((v: any) => (
+                                            <option key={v.id} value={v.id}>
+                                                {v.version_code} - {v.title || 'Tanpa Judul'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.version_id && <p className="text-rose-500 text-xs mt-1">{errors.version_id}</p>}
                                 </div>
                             </div>
 
@@ -182,7 +210,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         placeholder="Cari desa / kecamatan / kota..."
                                         value={searchVillage}
                                         onChange={e => setSearchVillage(e.target.value)}
-                                        className="w-full rounded-lg border-gray-300 focus:border-indigo-500 text-sm mb-2 shadow-sm"
+                                        className="w-full rounded-lg border-gray-300 focus:border-emerald-500 text-sm mb-2 shadow-sm"
                                     />
                                 </div>
                                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 max-h-64 overflow-y-auto">
@@ -193,7 +221,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                                     type="checkbox"
                                                     checked={data.village_ids.includes(village.id)}
                                                     onChange={() => toggleVillage(village.id)}
-                                                    className="w-4 h-4 rounded text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                                    className="w-4 h-4 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500"
                                                 />
                                                 <span className="text-sm font-medium text-gray-700">{village.full_name || village.name}</span>
                                             </label>
@@ -219,7 +247,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-colors disabled:opacity-50"
                                 >
                                     <Save size={16} /> Simpan Data
                                 </button>
@@ -231,7 +259,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                            <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                                 <tr>
                                     <th className="px-6 py-4">Nama Enumerator</th>
                                     <th className="px-6 py-4">Email</th>
@@ -251,7 +279,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
                                                 {user.assigned_villages?.map((v: any) => (
-                                                    <span key={v.id} className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs font-semibold">
+                                                    <span key={v.id} className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-semibold">
                                                         {v.full_name || v.name}
                                                     </span>
                                                 ))}
@@ -263,7 +291,7 @@ export default function Index({ enumerators, villages, filters, flash }: any) {
                                         <td className="px-6 py-4 flex justify-end gap-2">
                                             <button
                                                 onClick={() => startEdit(user)}
-                                                className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded transition-colors"
+                                                className="p-1.5 text-emerald-500 hover:bg-emerald-50 rounded transition-colors"
                                                 title="Edit"
                                             >
                                                 <Edit size={16} />

@@ -26,10 +26,12 @@ class EnumeratorController extends Controller
 
         $enumerators = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         $villages = Village::with('district.city')->orderBy('name')->get();
+        $versions = QuestionnaireVersion::orderBy('created_at', 'desc')->get(['id', 'version_code', 'title']);
 
         return Inertia::render('Admin/Enumerators/Index', [
             'enumerators' => $enumerators,
             'villages' => $villages,
+            'versions' => $versions,
             'filters' => $request->only(['search'])
         ]);
     }
@@ -40,6 +42,7 @@ class EnumeratorController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
+            'version_id' => 'required|exists:questionnaire_versions,id',
             'village_ids' => 'array',
             'village_ids.*' => 'exists:villages,id',
         ]);
@@ -57,7 +60,7 @@ class EnumeratorController extends Controller
 
             // Assign villages if provided
             if (!empty($validated['village_ids'])) {
-                $version = QuestionnaireVersion::where('is_active', true)->first();
+                $version = QuestionnaireVersion::find($validated['version_id']);
                 if ($version) {
                     foreach ($validated['village_ids'] as $villageId) {
                         \App\Models\EnumeratorVillage::create([
@@ -85,6 +88,7 @@ class EnumeratorController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($enumerator->id)],
             'password' => 'nullable|string|min:8',
+            'version_id' => 'required|exists:questionnaire_versions,id',
             'village_ids' => 'array',
             'village_ids.*' => 'exists:villages,id',
         ]);
@@ -104,10 +108,9 @@ class EnumeratorController extends Controller
             $enumerator->update($updateData);
 
             // Sync villages if provided
-            $version = QuestionnaireVersion::where('is_active', true)->first();
+            $version = QuestionnaireVersion::find($validated['version_id']);
             if ($version && isset($validated['village_ids'])) {
                 \App\Models\EnumeratorVillage::where('user_id', $enumerator->id)
-                    ->where('version_id', $version->id)
                     ->delete();
 
                 foreach ($validated['village_ids'] as $villageId) {

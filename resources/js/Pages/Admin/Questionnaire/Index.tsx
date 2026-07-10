@@ -89,28 +89,30 @@ export default function Index({ versions }: { versions: Version[] }) {
     return (
         <AuthenticatedLayout
             header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <FileText size={20} className="text-emerald-700" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <FileText className="text-emerald-700 w-5 h-5 sm:w-5 sm:h-5" />
                         Manajemen Kuesioner
                     </h2>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
-                    >
-                        <Plus size={16} />
-                        Versi Baru
-                    </button>
                 </div>
             }
         >
             <Head title="Manajemen Kuesioner" />
 
             <div className="space-y-6">
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-1.5 sm:gap-2 transition-colors w-full sm:w-auto shrink-0 shadow-sm"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Versi Baru
+                    </button>
+                </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-600 font-medium border-b border-gray-100">
+                            <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                                 <tr>
                                     <th className="px-6 py-4">Kode Versi</th>
                                     <th className="px-6 py-4">Judul</th>
