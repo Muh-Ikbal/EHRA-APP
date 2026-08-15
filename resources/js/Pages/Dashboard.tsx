@@ -1,14 +1,45 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, TrendingUp, Users } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, TrendingUp, Users, Calendar } from 'lucide-react';
 
-export default function Dashboard({ stats, riskDistribution, recentSurveys, surveyProgress }: any) {
+export default function Dashboard({
+    stats,
+    riskDistribution,
+    recentSurveys,
+    surveyProgress,
+    availableYears = [],
+    selectedYear = '',
+}: any) {
+    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const year = e.target.value;
+        router.get(route('dashboard'), year ? { year } : {}, { preserveState: true, replace: true });
+    };
+
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-lg font-bold text-gray-800">
-                    Dashboard Overview
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <h2 className="text-lg font-bold text-gray-800">
+                        Dashboard Overview
+                    </h2>
+                    <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-sm">
+                        <Calendar size={16} className="text-emerald-600 shrink-0" />
+                        <label htmlFor="year-filter" className="text-xs font-semibold text-gray-500 shrink-0">Tahun Survei:</label>
+                        <select
+                            id="year-filter"
+                            value={selectedYear}
+                            onChange={handleYearChange}
+                            className="bg-transparent border-none text-xs font-bold text-gray-800 focus:ring-0 py-0 pl-1 pr-6 cursor-pointer"
+                        >
+                            <option value="">Semua Tahun</option>
+                            {availableYears.map((year: number) => (
+                                <option key={year} value={year}>
+                                    Tahun {year}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             }
         >
             <Head title="Dashboard" />
@@ -55,10 +86,10 @@ export default function Dashboard({ stats, riskDistribution, recentSurveys, surv
                     {/* Stat 4 - Green gradient */}
                     <div className="rounded-2xl p-5 shadow-sm border border-transparent text-white flex items-center gap-4 relative overflow-hidden group hover:shadow-md transition-shadow" style={{ background: '#059669' }}>
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-300 ease-out"></div>
-                        <div className="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 relative z-10 backdrop-blur-sm">
+                        <div className="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 relative  backdrop-blur-sm">
                             <Activity size={24} />
                         </div>
-                        <div className="relative z-10">
+                        <div className="relative ">
                             <p className="text-sm font-medium text-white/80 mb-1">Indeks Risiko</p>
                             <h3 className="text-2xl font-bold text-white">{stats.average_risk_name}</h3>
                         </div>
@@ -69,22 +100,36 @@ export default function Dashboard({ stats, riskDistribution, recentSurveys, surv
                     {/* Main Chart Area */}
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 lg:col-span-2 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-base font-bold text-gray-800">Progress Survei EHRA</h3>
-                            <select className="bg-gray-50 border border-gray-200 text-sm rounded-lg text-gray-600 focus:ring-emerald-500 focus:border-emerald-500 py-1.5 px-3">
-                                <option>Bulan Ini</option>
-                                <option>Bulan Lalu</option>
+                            <h3 className="text-base font-bold text-gray-800">
+                                Progress Survei EHRA {selectedYear ? `(${selectedYear})` : ''}
+                            </h3>
+                            <select
+                                value={selectedYear}
+                                onChange={handleYearChange}
+                                className="bg-gray-50 border border-gray-200 text-sm rounded-lg text-gray-600 focus:ring-emerald-500 focus:border-emerald-500 py-1.5 px-3 cursor-pointer"
+                            >
+                                <option value="">Semua Tahun</option>
+                                {availableYears.map((year: number) => (
+                                    <option key={year} value={year}>
+                                        Tahun {year}
+                                    </option>
+                                ))}
                             </select>
                         </div>
-                        <div className="h-[250px] w-full flex items-end gap-2 text-xs text-gray-400">
+                        <div className="h-[250px] w-full flex items-end gap-0.5 sm:gap-1 text-xs text-gray-400">
                             {surveyProgress.map((p: any, i: number) => (
-                                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div className="w-full relative rounded-t-lg overflow-hidden bg-gray-50 flex items-end h-[200px]" title={`${p.value} Survei`}>
+                                <div key={i} className="flex-1 flex flex-col items-center group">
+                                    <div className="w-full max-w-[24px] sm:max-w-[32px] relative rounded-t-md bg-gray-50 flex items-end h-[185px]" title={`${p.value} Survei`}>
                                         <div
-                                            className="w-full rounded-t-lg transition-all duration-300"
+                                            className="w-full rounded-t-md transition-all duration-300 relative flex justify-center group-hover:brightness-110"
                                             style={{ height: `${p.height}%`, background: `#059669` }}
-                                        ></div>
+                                        >
+                                            <span className={`absolute -top-5 text-[11px] font-bold pointer-events-none whitespace-nowrap transition-colors ${p.value > 0 ? 'text-emerald-700' : 'text-gray-400'}`}>
+                                                {p.value}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <span className="font-medium">{p.label}</span>
+                                    <span className="font-medium text-gray-500 text-[11px] mt-1.5 truncate">{p.label}</span>
                                 </div>
                             ))}
                         </div>

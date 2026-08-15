@@ -16,17 +16,48 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        // Available survey years
+        $yearsFromSurveys = SurveyResponse::selectRaw('YEAR(created_at) as year')
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->pluck('year');
+
+        $yearsFromResults = VillageIrsResult::selectRaw('YEAR(created_at) as year')
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->pluck('year');
+
+        $availableYears = $yearsFromSurveys->concat($yearsFromResults)
+            ->filter()
+            ->map(fn($y) => (int) $y)
+            ->unique()
+            ->sortDesc()
+            ->values()
+            ->toArray();
+
+        $selectedYear = $request->query('year');
+        if ($selectedYear && !in_array((int) $selectedYear, $availableYears)) {
+            $selectedYear = null;
+        }
+
         // 1. Total Survei
-        $totalSurveys = SurveyResponse::count();
+        $totalSurveys = SurveyResponse::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })->count();
 
         // 2. Desa Tersurvei
         $totalVillages = Village::count();
-        $surveyedVillages = VillageIrsResult::distinct('village_id')->count();
+        $surveyedVillages = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })->distinct('village_id')->count();
 
         // 3. Risiko Tinggi & Rata-rata Indeks Risiko
-        $avgIrs = VillageIrsResult::avg('irs_total') ?? 0;
+        $avgIrs = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })->avg('irs_total') ?? 0;
+
         $categories = RiskAspectCategory::orderBy('lower_bound')->get();
-        
+
         $averageRiskCategory = $categories->first(function ($cat) use ($avgIrs) {
             return $avgIrs >= $cat->lower_bound && $avgIrs <= $cat->upper_bound;
         });
@@ -35,15 +66,20 @@ class DashboardController extends Controller
             return stripos($cat->category_name, 'Tinggi') !== false;
         })->pluck('id');
 
-        $highRiskCount = VillageIrsResult::whereIn('risk_aspect_category_id', $highRiskCategories)->count();
+        $highRiskCount = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })->whereIn('risk_aspect_category_id', $highRiskCategories)->count();
         $highRiskPercentage = $surveyedVillages > 0 ? round(($highRiskCount / $surveyedVillages) * 100) : 0;
 
         // 4. Distribusi Risiko
-        $riskDistribution = VillageIrsResult::with('riskAspectCategory')
+        $riskDistribution = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })
+            ->with('riskAspectCategory')
             ->select('risk_aspect_category_id', DB::raw('count(*) as total'))
             ->groupBy('risk_aspect_category_id')
             ->get()
-            ->map(function ($group) use ($surveyedVillages, $categories) {
+            ->map(function ($group) use ($surveyedVillages) {
                 $category = $group->riskAspectCategory;
                 return [
                     'name' => $category ? $category->category_name : 'Belum Dihitung',
@@ -54,7 +90,10 @@ class DashboardController extends Controller
             });
 
         // 5. Survei Terbaru
-        $recentSurveys = SurveyResponse::with(['village.district', 'enumerator'])
+        $recentSurveys = SurveyResponse::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })
+            ->with(['village.district', 'enumerator'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get()
@@ -69,13 +108,15 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 6. Progress Survei (Grafik 6 Bulan Terakhir)
-        $months = collect(range(5, 0))->map(function ($i) {
-            return now()->subMonths($i)->format('Y-m');
+        // 6. Progress Survei (Grafik 12 Bulan)
+        $targetYear = $selectedYear ?: now()->year;
+
+        $months = collect(range(1, 12))->map(function ($m) use ($targetYear) {
+            return sprintf('%04d-%02d', $targetYear, $m);
         });
-        
+
         $progressRaw = SurveyResponse::select(DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"), DB::raw('count(*) as total'))
-            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->whereYear('created_at', $targetYear)
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -105,6 +146,8 @@ class DashboardController extends Controller
             'riskDistribution' => $riskDistribution,
             'recentSurveys' => $recentSurveys,
             'surveyProgress' => $surveyProgress,
+            'availableYears' => $availableYears,
+            'selectedYear' => $selectedYear ? (string) $selectedYear : '',
         ]);
     }
 }

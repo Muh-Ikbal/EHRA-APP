@@ -390,31 +390,31 @@ export default function Conduct({ version, auth, assignedVillages = [] }: any) {
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="mt-8 flex items-center justify-between">
+                <div className="mt-8 flex items-center justify-between gap-3">
                     <button 
                         onClick={handlePrev}
                         disabled={currentSectionIdx === 0}
-                        className="px-6 py-3 rounded-xl font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all shadow-sm"
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2 transition-all shadow-sm whitespace-nowrap shrink-0"
                     >
-                        <ChevronLeft size={20} /> Sebelumnya
+                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> Sebelumnya
                     </button>
 
                     {currentSectionIdx < sections.length - 1 ? (
                         <button 
                             onClick={handleNext}
-                            className="px-8 py-3 rounded-xl font-bold text-white bg-emerald-700 hover:bg-emerald-800 flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                            className="px-5 sm:px-8 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold text-white bg-emerald-700 hover:bg-emerald-800 flex items-center gap-1.5 sm:gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap shrink-0"
                         >
-                            Selanjutnya <ChevronRight size={20} />
+                            Selanjutnya <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                         </button>
                     ) : (
                         <button 
                             onClick={handleSubmit}
                             disabled={isSubmitting}
-                            className="px-8 py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                            className="px-4 sm:px-8 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-1.5 sm:gap-2 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap shrink-0"
                         >
                             {isSubmitting ? 'Memproses...' : (
                                 <>
-                                    <Send size={20} /> Kirim Survei Final
+                                    <Send className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" /> Kirim Survei Final
                                 </>
                             )}
                         </button>
