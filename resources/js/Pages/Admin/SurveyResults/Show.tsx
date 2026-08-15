@@ -82,7 +82,11 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
         <AuthenticatedLayout
             header={
                 <div className="flex items-center gap-4">
-                    <Link href={route('admin.survey-results.index')} className="p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                    <Link
+                        href={route('admin.survey-results.village', { villageId: response.village_id, version_id: response.version_id })}
+                        className="p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                        title="Kembali ke Hasil Survei Desa"
+                    >
                         <ArrowLeft size={20} />
                     </Link>
                     <h2 className="font-semibold text-xl text-gray-800 leading-tight">Detail Hasil Survei</h2>
@@ -173,7 +177,6 @@ export default function Show({ auth, response, sections, irsResult }: PageProps<
                                     <p className="text-sm text-gray-500 mb-1">Skor Total Desa</p>
                                     <div className="flex items-end gap-2">
                                         <span className="text-3xl font-extrabold text-gray-900">{irsResult.irs_total}</span>
-                                        <span className="text-sm font-medium text-gray-500 mb-1">/ 100</span>
                                     </div>
                                 </div>
                                 <div className="pt-4 border-t border-gray-100">

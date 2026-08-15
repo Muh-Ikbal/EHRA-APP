@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         // Survey Results Routes (Accessible to Admin & Enumerator)
         Route::get('/survey-results', [\App\Http\Controllers\Admin\SurveyResultController::class, 'index'])->name('survey-results.index');
+        Route::get('/survey-results/village/{villageId}', [\App\Http\Controllers\Admin\SurveyResultController::class, 'villageResponses'])->name('survey-results.village');
         Route::get('/survey-results/{id}', [\App\Http\Controllers\Admin\SurveyResultController::class, 'show'])->name('survey-results.show');
         Route::get('/survey-results/{id}/edit', [\App\Http\Controllers\Admin\SurveyResultController::class, 'edit'])->name('survey-results.edit');
         Route::put('/survey-results/{id}', [\App\Http\Controllers\Admin\SurveyResultController::class, 'update'])->name('survey-results.update');

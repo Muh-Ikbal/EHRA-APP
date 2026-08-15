@@ -1,6 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
-import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, TrendingUp, Users, Calendar } from 'lucide-react';
+import { FileText, MapPin, Activity, CheckCircle2, AlertTriangle, Calendar } from 'lucide-react';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Dashboard({
     stats,
@@ -9,10 +13,23 @@ export default function Dashboard({
     surveyProgress,
     availableYears = [],
     selectedYear = '',
+    availableVersions = [],
+    selectedVersionId = '',
 }: any) {
     const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const year = e.target.value;
-        router.get(route('dashboard'), year ? { year } : {}, { preserveState: true, replace: true });
+        const query: any = {};
+        if (year) query.year = year;
+        if (selectedVersionId) query.version_id = selectedVersionId;
+        router.get(route('dashboard'), query, { preserveState: true, replace: true });
+    };
+
+    const handleVersionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const version_id = e.target.value;
+        const query: any = {};
+        if (selectedYear) query.year = selectedYear;
+        if (version_id) query.version_id = version_id;
+        router.get(route('dashboard'), query, { preserveState: true, replace: true });
     };
 
     return (
@@ -135,61 +152,85 @@ export default function Dashboard({
                         </div>
                     </div>
 
-                    {/* Right Column */}
+                    {/* Right Column - Risk Distribution Pie Chart */}
                     <div className="space-y-6">
-                        {/* Risk Distribution */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <h3 className="text-base font-bold text-gray-800 mb-4">Distribusi Risiko</h3>
-                            <div className="space-y-4">
-                                {riskDistribution.map((item: any, i: number) => (
-                                    <div key={i}>
-                                        <div className="flex justify-between text-sm mb-1.5">
-                                            <span className="text-gray-600 font-medium flex items-center gap-2">
-                                                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
-                                                {item.name}
-                                            </span>
-                                            <span className="text-gray-800 font-bold">{item.pct}% <span className="text-gray-400 font-normal text-xs">({item.count})</span></span>
-                                        </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-2">
-                                            <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${item.pct}%`, backgroundColor: item.color }}></div>
-                                        </div>
-                                    </div>
-                                ))}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between h-full">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                                <h3 className="text-base font-bold text-gray-800">Distribusi Risiko</h3>
+                                <select
+                                    value={selectedVersionId}
+                                    onChange={handleVersionChange}
+                                    className="bg-gray-50 border border-gray-200 text-xs rounded-lg text-gray-700 focus:ring-emerald-500 focus:border-emerald-500 py-1 px-2.5 cursor-pointer max-w-[180px] truncate"
+                                    title="Filter Versi Kuisioner"
+                                >
+                                    <option value="">Semua Versi</option>
+                                    {availableVersions.map((v: any) => (
+                                        <option key={v.id} value={v.id}>
+                                            {v.version_code}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                        </div>
 
-                        {/* Recent Activity */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <h3 className="text-base font-bold text-gray-800 mb-4">Aktivitas Terbaru</h3>
-                            <div className="space-y-4">
-                                <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                                        <CheckCircle2 size={16} />
+                            {riskDistribution && riskDistribution.length > 0 ? (
+                                <div className="flex flex-col items-center">
+                                    <div className="w-[190px] h-[190px] my-2 relative">
+                                        <Pie
+                                            data={{
+                                                labels: riskDistribution.map((item: any) => item.name),
+                                                datasets: [
+                                                    {
+                                                        data: riskDistribution.map((item: any) => item.count),
+                                                        backgroundColor: riskDistribution.map((item: any) => item.color || '#cccccc'),
+                                                        borderColor: '#ffffff',
+                                                        borderWidth: 2,
+                                                    },
+                                                ],
+                                            }}
+                                            options={{
+                                                responsive: true,
+                                                maintainAspectRatio: false,
+                                                plugins: {
+                                                    legend: {
+                                                        display: false,
+                                                    },
+                                                    tooltip: {
+                                                        callbacks: {
+                                                            label: (context: any) => {
+                                                                const label = context.label || '';
+                                                                const value = context.raw || 0;
+                                                                const dataset = context.chart.data.datasets[0].data;
+                                                                const total = dataset.reduce((a: number, b: number) => a + b, 0);
+                                                                const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                                                                return ` ${label}: ${pct}% (${value} Desa)`;
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            }}
+                                        />
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-800">Desa Suka Maju selesai</p>
-                                        <p className="text-xs text-gray-500">Kuota 40/40 terpenuhi • 2 jam lalu</p>
+                                    
+                                    {/* Custom Legend */}
+                                    <div className="w-full space-y-2 mt-4 pt-3 border-t border-gray-100">
+                                        {riskDistribution.map((item: any, i: number) => (
+                                            <div key={i} className="flex items-center justify-between text-xs">
+                                                <span className="text-gray-600 font-medium flex items-center gap-2">
+                                                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }}></span>
+                                                    <span className="truncate max-w-[140px]" title={item.name}>{item.name}</span>
+                                                </span>
+                                                <span className="text-gray-800 font-bold">
+                                                    {item.pct}% <span className="text-gray-400 font-normal text-[11px]">({item.count})</span>
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                                <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-                                        <Users size={16} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-800">Enumerator Budi login</p>
-                                        <p className="text-xs text-gray-500">Mulai survei Kec. Kota • 3 jam lalu</p>
-                                    </div>
+                            ) : (
+                                <div className="py-12 text-center text-gray-400 text-sm">
+                                    Belum ada data distribusi risiko
                                 </div>
-                                <div className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-teal-50 text-teal-500 flex items-center justify-center shrink-0">
-                                        <TrendingUp size={16} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-800">Laporan mingguan di-generate</p>
-                                        <p className="text-xs text-gray-500">Sistem otomatis • Kemarin</p>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>

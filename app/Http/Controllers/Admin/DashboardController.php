@@ -71,21 +71,35 @@ class DashboardController extends Controller
         })->whereIn('risk_aspect_category_id', $highRiskCategories)->count();
         $highRiskPercentage = $surveyedVillages > 0 ? round(($highRiskCount / $surveyedVillages) * 100) : 0;
 
+        $selectedVersionId = $request->query('version_id');
+        $availableVersions = \App\Models\QuestionnaireVersion::orderBy('created_at', 'desc')->get(['id', 'version_code', 'title']);
+
         // 4. Distribusi Risiko
+        $totalRiskDistCount = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
+            $q->whereYear('created_at', $selectedYear);
+        })
+            ->when($selectedVersionId, function ($q) use ($selectedVersionId) {
+                $q->where('version_id', $selectedVersionId);
+            })
+            ->count();
+
         $riskDistribution = VillageIrsResult::when($selectedYear, function ($q) use ($selectedYear) {
             $q->whereYear('created_at', $selectedYear);
         })
+            ->when($selectedVersionId, function ($q) use ($selectedVersionId) {
+                $q->where('version_id', $selectedVersionId);
+            })
             ->with('riskAspectCategory')
             ->select('risk_aspect_category_id', DB::raw('count(*) as total'))
             ->groupBy('risk_aspect_category_id')
             ->get()
-            ->map(function ($group) use ($surveyedVillages) {
+            ->map(function ($group) use ($totalRiskDistCount) {
                 $category = $group->riskAspectCategory;
                 return [
                     'name' => $category ? $category->category_name : 'Belum Dihitung',
                     'color' => $category ? $category->color : '#cccccc',
                     'count' => $group->total,
-                    'pct' => $surveyedVillages > 0 ? round(($group->total / $surveyedVillages) * 100) : 0,
+                    'pct' => $totalRiskDistCount > 0 ? round(($group->total / $totalRiskDistCount) * 100) : 0,
                 ];
             });
 
@@ -148,6 +162,8 @@ class DashboardController extends Controller
             'surveyProgress' => $surveyProgress,
             'availableYears' => $availableYears,
             'selectedYear' => $selectedYear ? (string) $selectedYear : '',
+            'availableVersions' => $availableVersions,
+            'selectedVersionId' => $selectedVersionId ? (string) $selectedVersionId : '',
         ]);
     }
 }

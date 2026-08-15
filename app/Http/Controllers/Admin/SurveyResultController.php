@@ -4,45 +4,165 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SurveyResponse;
+use App\Models\Village;
+use App\Models\VillageIrsResult;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SurveyResultController extends Controller
 {
     /**
-     * Display a listing of the survey responses.
+     * Display a listing of the survey responses grouped by Village.
      */
     public function index(Request $request)
     {
-        $query = SurveyResponse::with(['enumerator', 'village', 'version'])
-            ->latest('submitted_at');
+        $versionId = $request->query('version_id');
+        $status = $request->query('status');
+        $search = $request->query('search');
+
+        // Query villages that have survey responses matching the filters
+        $villageQuery = Village::whereHas('surveyResponses', function ($q) use ($versionId, $status, $search) {
+            if ($versionId) {
+                $q->where('version_id', $versionId);
+            }
+            if ($status) {
+                $q->where('status', $status);
+            }
+            if ($search) {
+                $q->where(function ($sq) use ($search) {
+                    $sq->where('respondent_code', 'like', "%{$search}%")
+                      ->orWhereHas('enumerator', function ($eq) use ($search) {
+                          $eq->where('name', 'like', "%{$search}%");
+                      })
+                      ->orWhereHas('village', function ($vq) use ($search) {
+                          $vq->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+        })
+        ->with(['district.city'])
+        ->withCount(['surveyResponses as total_surveys' => function ($q) use ($versionId, $status, $search) {
+            if ($versionId) $q->where('version_id', $versionId);
+            if ($status) $q->where('status', $status);
+            if ($search) {
+                $q->where(function ($sq) use ($search) {
+                    $sq->where('respondent_code', 'like', "%{$search}%")
+                      ->orWhereHas('enumerator', function ($eq) use ($search) {
+                          $eq->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+        }]);
 
         $user = auth()->user();
         if ($user && $user->isEnumerator()) {
             $assignedVillageIds = $user->assignedVillages()->pluck('villages.id');
-            $query->whereIn('village_id', $assignedVillageIds);
+            $villageQuery->whereIn('id', $assignedVillageIds);
         }
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('respondent_code', 'like', "%{$search}%")
-                  ->orWhereHas('village', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('enumerator', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
+        $villages = $villageQuery->orderBy('name')->paginate(10)->withQueryString();
+
+        // Transform villages data for index list
+        $villages->getCollection()->transform(function ($village) use ($versionId) {
+            // Fetch IRS result snapshot for this village
+            $irsResult = VillageIrsResult::where('village_id', $village->id)
+                ->when($versionId, fn($q) => $q->where('version_id', $versionId))
+                ->with('riskAspectCategory')
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            return [
+                'id' => $village->id,
+                'name' => $village->name,
+                'district_name' => $village->district->name ?? '-',
+                'total_surveys' => $village->total_surveys,
+                'irs_result' => $irsResult ? [
+                    'irs_total' => $irsResult->irs_total,
+                    'category_name' => $irsResult->riskAspectCategory->category_name ?? 'Belum Terkategori',
+                    'color' => $irsResult->riskAspectCategory->color ?? '#9ca3af',
+                ] : null,
+            ];
+        });
+
+        $versions = \App\Models\QuestionnaireVersion::orderBy('created_at', 'desc')->get(['id', 'version_code', 'title']);
+
+        return Inertia::render('Admin/SurveyResults/Index', [
+            'villages' => $villages,
+            'versions' => $versions,
+            'filters' => $request->only(['search', 'status', 'version_id']),
+        ]);
+    }
+
+    /**
+     * Display a listing of survey responses for a specific village.
+     */
+    public function villageResponses(Request $request, $villageId)
+    {
+        $village = Village::with('district.city.province')->findOrFail($villageId);
+
+        $user = auth()->user();
+        if ($user && $user->isEnumerator()) {
+            $assignedVillageIds = $user->assignedVillages()->pluck('villages.id');
+            if (!$assignedVillageIds->contains($villageId)) {
+                abort(403, 'Anda tidak memiliki akses ke desa ini.');
+            }
+        }
+
+        $versionId = $request->query('version_id');
+        $status = $request->query('status');
+        $search = $request->query('search');
+
+        // Fetch IRS calculation snapshot for this village
+        $irsResult = VillageIrsResult::where('village_id', $villageId)
+            ->when($versionId, fn($q) => $q->where('version_id', $versionId))
+            ->with('riskAspectCategory')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Build query for survey responses in this village
+        $query = SurveyResponse::where('village_id', $villageId)
+            ->with(['enumerator', 'version'])
+            ->latest('submitted_at');
+
+        if ($versionId) {
+            $query->where('version_id', $versionId);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        }
+        if ($search) {
+            $query->where(function ($sq) use ($search) {
+                $sq->where('respondent_code', 'like', "%{$search}%")
+                  ->orWhereHas('enumerator', function ($eq) use ($search) {
+                      $eq->where('name', 'like', "%{$search}%");
                   });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            });
         }
 
         $responses = $query->paginate(15)->withQueryString();
+        $versions = \App\Models\QuestionnaireVersion::orderBy('created_at', 'desc')->get(['id', 'version_code', 'title']);
 
-        return Inertia::render('Admin/SurveyResults/Index', [
+        $totalSurveys = SurveyResponse::where('village_id', $villageId)
+            ->when($versionId, fn($q) => $q->where('version_id', $versionId))
+            ->count();
+
+        return Inertia::render('Admin/SurveyResults/VillageResponses', [
+            'village' => [
+                'id' => $village->id,
+                'name' => $village->name,
+                'district_name' => $village->district->name ?? '-',
+                'city_name' => $village->district->city->name ?? '-',
+                'province_name' => $village->district->city->province->name ?? '-',
+                'total_surveys' => $totalSurveys,
+            ],
+            'irsResult' => $irsResult ? [
+                'irs_total' => $irsResult->irs_total,
+                'category_name' => $irsResult->riskAspectCategory->category_name ?? 'Belum Terkategori',
+                'color' => $irsResult->riskAspectCategory->color ?? '#9ca3af',
+            ] : null,
             'responses' => $responses,
-            'filters' => $request->only(['search', 'status']),
+            'versions' => $versions,
+            'filters' => $request->only(['search', 'status', 'version_id']),
         ]);
     }
 

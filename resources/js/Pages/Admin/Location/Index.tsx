@@ -162,20 +162,7 @@ export default function Index({ level, parentId, locations, breadcrumbs, flash }
                                         )}
                                     </td>
                                     
-                                    {level === 'city' && (
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="inline-block px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-semibold uppercase w-max">
-                                                    {loc.type}
-                                                </span>
-                                                {loc.geojson_path && (
-                                                    <a href={`/storage/${loc.geojson_path}`} target="_blank" className="text-emerald-600 hover:text-emerald-800 text-xs inline-flex items-center gap-1">
-                                                        <FileJson size={12} /> Ada File GeoJSON
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </td>
-                                    )}
+                                    
 
                                     {level === 'village' && (
                                         <td className="px-6 py-4">
