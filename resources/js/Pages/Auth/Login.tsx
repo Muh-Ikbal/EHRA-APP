@@ -68,7 +68,7 @@ export default function Login({
                     <div className="mb-10">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">Selamat Datang!</h2>
                         <p className="text-sm text-gray-500">
-                            Belum punya akun? <Link href={route('register')} className="font-semibold underline" style={{ color: '#059669' }}>Daftar sekarang</Link>, gratis dan hanya butuh beberapa detik.
+                            Halo! sahabat EHRA, silahkan melakukan login dengan memasukkan email dan password yang diberikan admin.
                         </p>
                     </div>
 

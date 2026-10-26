@@ -1,0 +1,33 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class UserSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    /**
+     * Run the database seeds.
+     * Salin file ini menjadi UserSeeder.php untuk membuat akun administrator secara lokal.
+     * File UserSeeder.php sudah dimasukkan ke .gitignore agar tidak ter-expose ke GitHub.
+     */
+    public function run(): void
+    {
+        $email = env('ADMIN_EMAIL', 'admin@ehra.com');
+        $name = env('ADMIN_NAME', 'Administrator EHRA');
+        $password = env('ADMIN_PASSWORD', 'password');
+
+        if (User::where('email', $email)->doesntExist()) {
+            User::factory()->create([
+                'name'     => $name,
+                'email'    => $email,
+                'password' => bcrypt($password),
+                'role'     => 'admin',
+            ]);
+        }
+    }
+}

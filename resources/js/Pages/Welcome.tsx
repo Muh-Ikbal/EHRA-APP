@@ -247,12 +247,12 @@ export default function Welcome({
                             </Link>
                         ) : (
                             <>
-                                <Link href={route('login')} className="text-white text-[11px] sm:text-[13px] font-semibold no-underline px-2 py-1.5 sm:px-4 sm:py-2 rounded-md hover:bg-white/10 transition-colors whitespace-nowrap">
+                                <Link href={route('login')} className="text-[#059669] text-[11px] sm:text-[13px] font-semibold no-underline px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm whitespace-nowrap">
                                     Log in
                                 </Link>
-                                <Link href={route('register')} className="text-[#059669] text-[11px] sm:text-[13px] font-semibold no-underline px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm whitespace-nowrap">
+                                {/* <Link href={route('register')} className="text-[#059669] text-[11px] sm:text-[13px] font-semibold no-underline px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white hover:bg-gray-100 transition-colors shadow-sm whitespace-nowrap">
                                     Register
-                                </Link>
+                                </Link> */}
                             </>
                         )}
                     </div>
@@ -345,10 +345,14 @@ export default function Welcome({
                     <div className="relative h-[400px] lg:h-auto lg:min-h-full">
                         <MapContainer center={[-4.14491, 122.174605]} zoom={7} scrollWheelZoom={true}
                             style={{ height: '100%', width: '100%', backgroundColor: '#e8f0ec' }}>
-                            <TileLayer
+                            {/* <TileLayer
                                 attribution='&copy; <a href="https://carto.com">CARTO</a>'
                                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                            />
+                            /> */}
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                />
                             {geoData && (
                                 <GeoJSON data={geoData} style={styleFeature} onEachFeature={onEachFeature} />
                             )}

@@ -15,11 +15,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Admin user (required before questionnaire seeder)
-        if (User::count() === 0) {
+        // 1. Admin user (menggunakan UserSeeder lokal yang di-exclude dari git, atau via konfigurasi .env)
+        if (class_exists(UserSeeder::class)) {
+            $this->call(UserSeeder::class);
+        } elseif (env('ADMIN_EMAIL') && User::where('email', env('ADMIN_EMAIL'))->doesntExist()) {
+            User::factory()->create([
+                'name'     => env('ADMIN_NAME', 'Administrator EHRA'),
+                'email'    => env('ADMIN_EMAIL'),
+                'password' => bcrypt(env('ADMIN_PASSWORD', 'password')),
+                'role'     => 'admin',
+            ]);
+        } elseif (User::where('role', 'admin')->doesntExist() && app()->environment('local')) {
             User::factory()->create([
                 'name'  => 'Administrator EHRA',
-                'email' => 'admin@ehra.com,',
+                'email' => 'admin@ehra.local',
                 'role'  => 'admin',
             ]);
         }
